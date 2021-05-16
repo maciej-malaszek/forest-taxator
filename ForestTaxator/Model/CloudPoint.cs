@@ -8,10 +8,7 @@ namespace ForestTaxator.Model
         public float Intensity { get; set; }
         public PointSet OwningSet { get; private set; }
 
-        public CloudPoint()
-        {
-
-        }
+        public CloudPoint() {  }
 
         public CloudPoint(double x, double y, double z)
         {

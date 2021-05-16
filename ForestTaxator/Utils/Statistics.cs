@@ -6,10 +6,10 @@ namespace ForestTaxator.Utils
 {
     public static class Statistics
     {
-        public static double Average(IEnumerable<double> data) => data != null && data.Any() ?  data.Average() : -1;
-        public static double Average(IEnumerable<int> data) => data != null && data.Any() ? data.Average() : -1;
+        public static double Average(IList<double> data) => data != null && data.Any() ?  data.Average() : -1;
+        public static double Average(IList<int> data) => data != null && data.Any() ? data.Average() : -1;
 
-        public static double StandardDeviation(IEnumerable<double> data)
+        public static double StandardDeviation(IList<double> data)
         {
             var enumerable = data as double[] ?? data.ToArray();
             var avg = Average(enumerable);
@@ -18,7 +18,7 @@ namespace ForestTaxator.Utils
             return Math.Sqrt(sum / enumerable.Length);
         }
         
-        public static double StandardDeviation(IEnumerable<double> data, double average)
+        public static double StandardDeviation(IList<double> data, double average)
         {
             var enumerable = data as double[] ?? data.ToArray();
             var sum = enumerable.Sum(x => Math.Pow(x - average, 2));

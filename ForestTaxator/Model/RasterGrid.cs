@@ -72,13 +72,17 @@ namespace ForestTaxator.Model
             }
         }
 
-        public void FilterLowDensity(uint size)
+        public void FilterLowDensity(int size)
         {
             for (var x = 0; x < MeshCount; x++)
-            for (var y = 0; y < MeshCount; y++)
             {
-                if (PointSets[x, y] != null && PointSets[x, y].Count < size)
+                for (var y = 0; y < MeshCount; y++)
                 {
+                    if (PointSets[x, y] == null || PointSets[x, y].Count >= size)
+                    {
+                        continue;
+                    }
+
                     PointSets[x, y].Clear();
                     PointSets[x, y] = null;
                 }

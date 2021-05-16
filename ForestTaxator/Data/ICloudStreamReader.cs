@@ -6,6 +6,7 @@ namespace ForestTaxator.Data
     {
         CloudPoint ReadPoint();
         PointSet ReadPointSet();
+        Cloud ReadCloud();
         long Size { get; }
     }
 }

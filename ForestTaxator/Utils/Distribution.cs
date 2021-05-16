@@ -7,7 +7,7 @@ namespace ForestTaxator.Utils
     {
         private double[] _data;
         public long Size => _data.Length;
-        public Distribution(IEnumerable<int> data)
+        public Distribution(IList<int> data)
         {
             _data = data?.Select(x => (double) x).ToArray();
         }
@@ -78,10 +78,10 @@ namespace ForestTaxator.Utils
 
         public Distribution Normalized() => new(GetNormalizedData());
 
-        public double Average() => Statistics.Average(_data.Skip(2).SkipLast(2));
+        public double Average() => Statistics.Average(_data.Skip(2).SkipLast(2).ToList());
 
-        public double StandardDeviation(double average) => Statistics.StandardDeviation(_data.Skip(2).SkipLast(2), average);
+        public double StandardDeviation(double average) => Statistics.StandardDeviation(_data.Skip(2).SkipLast(2).ToList(), average);
 
-        public double StandardDeviation() => Statistics.StandardDeviation(_data.Skip(2).SkipLast(2));
+        public double StandardDeviation() => Statistics.StandardDeviation(_data.Skip(2).SkipLast(2).ToList());
     }
 }

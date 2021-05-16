@@ -1,4 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using ForestTaxator.Model;
 
 namespace ForestTaxator.Filters
@@ -14,30 +18,20 @@ namespace ForestTaxator.Filters
             UpperRange = upperRange;
         }
 
-        public void Filter(PointSet[] groups)
+        private bool AspectRatioWithRange(PointSet pointSet)
         {
-            if (groups == null)
+            if (pointSet == null || pointSet.Count == 0)
             {
-                return;
+                return false;
             }
 
-            for (var j = 0; j < groups.Length; j++)
-            {
-                if (groups[j] == null || groups[j].Count == 0)
-                {
-                    groups[j] = null;
-                    continue;
-                }
+            var aspectRatio = pointSet.BoundingBox.Width / pointSet.BoundingBox.Depth;
+            return aspectRatio >= LowerRange && aspectRatio <= UpperRange;
+        }
 
-                var aspectRatio = groups[j].BoundingBox.Width / groups[j].BoundingBox.Depth;
-                if (aspectRatio >= LowerRange && aspectRatio <= UpperRange)
-                {
-                    continue;
-                }
-
-                groups[j] = null;
-                Console.WriteLine($"Aspect Ration Nullify {aspectRatio}");
-            }
+        public IList<PointSet> Filter(IList<PointSet> pointSets)
+        {
+            return pointSets?.Where(AspectRatioWithRange).ToList() ?? new List<PointSet>();
         }
     }
 }

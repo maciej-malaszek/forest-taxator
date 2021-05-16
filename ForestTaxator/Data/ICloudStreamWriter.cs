@@ -6,5 +6,6 @@ namespace ForestTaxator.Data
     {
         void WritePoint(Point point);
         void WritePointSet(PointSet pointSet);
+        void WritePointSetGroup(PointSetGroup pointSetGroup);
     }
 }

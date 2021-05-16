@@ -7,7 +7,6 @@ namespace ForestTaxator.Model
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
-        public float Intensity { get; set; }
 
         public Point()
         {
@@ -59,7 +58,6 @@ namespace ForestTaxator.Model
             Array.Copy(BitConverter.GetBytes(X),data,8);
             Array.Copy(BitConverter.GetBytes(Y),0, data,8, 8);
             Array.Copy(BitConverter.GetBytes(Z),0, data,16, 8);
-            Array.Copy(BitConverter.GetBytes(Intensity),0, data,24, 8);
             return data;
         }
     }

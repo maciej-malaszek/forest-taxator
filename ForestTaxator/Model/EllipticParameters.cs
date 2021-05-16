@@ -8,13 +8,13 @@ namespace ForestTaxator.Model
 {
     public class EllipticParameters : IGeneticallySerializable
     {
-        private static readonly Range<float>[] Range = {
-                new Range<float>(0.01f, 0.4f),
-                new Range<float>(-0.1f, 0.1f),
+        private static readonly Range<float>[] _range = {
+                new(0.01f, 0.4f),
+                new(-0.1f, 0.1f),
           };
 
-        private static float Scale0 => Range[0].High - Range[0].Low;
-        private static float Scale1 => Range[1].High - Range[1].Low;
+        private static float Scale0 => _range[0].High - _range[0].Low;
+        private static float Scale1 => _range[1].High - _range[1].Low;
         private static float Step0 => Scale0 / byte.MaxValue;
         private static float Step1 => Scale1 / byte.MaxValue;
 
@@ -33,17 +33,13 @@ namespace ForestTaxator.Model
             {
                 if (i == 4)
                 {
-                    var rawValue = (byte)((_parameters[i] - Range[0].Low) / Step0);
+                    var rawValue = (byte)((_parameters[i] - _range[0].Low) / Step0);
                     bytes.Add(rawValue);
                 }
                 else
                 {
-                    var rawValue = (byte)((_parameters[i] - Range[1].Low) / Step1);
+                    var rawValue = (byte)((_parameters[i] - _range[1].Low) / Step1);
                     bytes.Add(rawValue);
-
-                    //ushort rawValue = (ushort)((_parameters[i] - Range[1].Low) / Step1);
-                    //bytes.AddRange(BitConverter.GetBytes(rawValue));
-                    //bytes.AddRange(BitConverter.GetBytes(_parameters[i]));
                 }
             }
 
@@ -59,20 +55,14 @@ namespace ForestTaxator.Model
                 {
                     var rawValue = data[offset];
                     offset += sizeof(byte);
-                    _parameters[i] = rawValue * Step0 + Range[0].Low;
+                    _parameters[i] = rawValue * Step0 + _range[0].Low;
                 }
                 else
                 {
 
                     var rawValue = data[offset];
                     offset += sizeof(byte);
-                    _parameters[i] = rawValue * Step1 + Range[1].Low;
-
-                    //ushort rawValue = BitConverter.ToUInt16(data, offset);
-                    //offset += sizeof(ushort);
-                    //_parameters[i] = rawValue * Step1 + Range[1].Low;
-
-                    //_parameters[i] = BitConverter.ToSingle(data, sizeof(float) * i);
+                    _parameters[i] = rawValue * Step1 + _range[1].Low;
                 }
             }
 

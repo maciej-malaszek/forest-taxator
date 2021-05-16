@@ -2,8 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ForestTaxator.Utils;
-using static ForestTaxator.Utils.MathUtils;
+using ForestTaxator.Algorithms;
 
 namespace ForestTaxator.Model
 {
@@ -61,7 +60,7 @@ namespace ForestTaxator.Model
             _centerPoint = new Point();
         }
 
-        public PointSet(IEnumerable<CloudPoint> points)
+        public PointSet(IList<CloudPoint> points)
         {
             Points.AddRange(points);
             _boundingBoxDeprecated = true;
@@ -191,7 +190,7 @@ namespace ForestTaxator.Model
             return pointSet;
         }
 
-        public PointSlice[] SplitByHeight(Box analyzedBox, float sliceHeight)
+        public IList<PointSlice> SplitByHeight(Box analyzedBox, float sliceHeight)
         {
             var box = analyzedBox.Intersect(BoundingBox);
             var minZ = box.P1.Z;
@@ -204,7 +203,6 @@ namespace ForestTaxator.Model
                 {
                     continue;
                 }
-
                 var z = (int)((cloudPoint.Z - minZ) / sliceHeight);
                 if (slices[z] == null)
                 {
@@ -213,12 +211,8 @@ namespace ForestTaxator.Model
                         PointSets = new List<PointSet>(),
                         Height = Math.Round(cloudPoint.Z,1)
                     };
-                    
                     slices[z].PointSets.Add(new PointSet());
-                    
                 }
-                
-
                 slices[z].PointSets[0].Add(cloudPoint);
             }
 
@@ -254,30 +248,56 @@ namespace ForestTaxator.Model
             return terrain;
         }
 
-        public Distribution GetDistribution(EDimension dimension, int steps)
+        public Tree.Node FindBestNode(IList<Tree> potentialTrees, MergingParameters parameters)
         {
-            var distribution = new int[steps];
-            var setSize = P2[(int) dimension] - P1[(int) dimension];
-            var stepSize = setSize / (steps - 1);
+            double bestDistance = int.MaxValue;
+            Tree.Node bestTreeNode = null;
 
-            for (var i = 0; i < Count; i++)
+            foreach (var tree in potentialTrees)
             {
-                var index = (int) ((this[i][(int) dimension] + setSize / 2) / stepSize);
-                distribution[index]++;
+                var z = Center.Z;
+                var nodes = tree.GetNodeByHeightWithLeaves(z);
+
+                foreach (var node in nodes)
+                {
+                    if (node.PointsOutTo(Center, parameters))
+                    {
+                        return node;
+                    }
+                }
+
+                var treeNode = tree.GetNearestNode(Center, out var distance);
+
+                if (treeNode == null)
+                {
+                    continue;
+                }
+
+                if (distance >= parameters.MinimumGroupingDistance)
+                {
+                    continue;
+                }
+
+                if (distance >= bestDistance)
+                {
+                    continue;
+                }
+
+                if (Center.Z - treeNode.Center.Z >= parameters.MaximumGroupingEmptyHeight)
+                {
+                    continue;
+                }
+
+                if (Center.Z - treeNode.Center.Z <= 0)
+                {
+                    continue;
+                }
+
+                bestDistance = distance;
+                bestTreeNode = treeNode;
             }
 
-            return new Distribution(distribution);
-        }
-
-        public Distribution[] GetDistribution(int steps, params EDimension[] dimensions)
-        {
-            var distributions = new Distribution[dimensions.Length];
-            for (var i = 0; i < dimensions.Length; i++)
-            {
-                distributions[i] = GetDistribution(dimensions[i], steps);
-            }
-
-            return distributions;
+            return bestTreeNode;
         }
 
         public IEnumerator<CloudPoint> GetEnumerator() => Points.GetEnumerator();

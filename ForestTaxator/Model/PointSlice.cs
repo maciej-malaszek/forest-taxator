@@ -10,25 +10,24 @@ namespace ForestTaxator.Model
         
         public double Height { get; set; }
 
-        public RasterGrid Rasterize(float meshWidth = 0.1f, uint minimumCloudPoints = 10)
+        private RasterGrid Rasterize(float meshWidth = 0.1f, int minimumCloudPoints = 10)
         {
             var rasterGrid = new RasterGrid(PointSets[0], meshWidth);
             rasterGrid.FilterLowDensity(minimumCloudPoints);
             return rasterGrid;
         }
 
-        public PointSet[] GroupByDistance(float meshWidth = 0.1f, uint minimalPointsPerMesh = 10, int stackSize = 67108864)
+        public PointSetGroup GroupByDistance(float meshWidth = 0.1f, int minimalPointsPerMesh = 10, int stackSize = 67108864)
         {
-            PointSet[] groups = null;
-            var start = new ThreadStart(() => groups = ExtractGroups(Rasterize(meshWidth, minimalPointsPerMesh)));
+            var group = new PointSetGroup();
+            var start = new ThreadStart(() => group.PointSets = ExtractGroups(Rasterize(meshWidth, minimalPointsPerMesh)));
             var t = new Thread(start, stackSize);
             t.Start();
             t.Join();
-
-            return groups;
+            return group;
         }
 
-        private static PointSet[] ExtractGroups(RasterGrid rasterGrid)
+        private static IList<PointSet> ExtractGroups(RasterGrid rasterGrid)
         {
             var groups = new LinkedList<PointSet>();
 
