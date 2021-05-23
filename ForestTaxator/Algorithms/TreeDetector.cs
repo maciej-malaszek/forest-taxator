@@ -25,10 +25,10 @@ namespace ForestTaxator.Algorithms
             Console.WriteLine("Starting point grouping...");
             var groups = slices.Select(slice => 
                 slice?.GroupByDistance(detectionParameters.MeshWidth, detectionParameters.MinimalPointsPerMesh)
-            ).Where(slice => slice != null);
+            ).Where(slice => slice != null).ToList();
             Console.WriteLine("Points grouped...");
             Console.WriteLine("Starting filtering...");
-            return groups.Select(group => group.Filter(detectionParameters.PointSetFilters)).ToList();
+            return groups.Select(group => group.Filter(detectionParameters.PointSetFilters)).Where(x=>x != null).ToList();
         }
         
         /// <summary>
@@ -54,10 +54,10 @@ namespace ForestTaxator.Algorithms
     public class DetectionParameters
     {
         public float SliceHeight { get; set; } = 0.1f;
-        public ITreeFilter[] TreeFilters { get; set; }
-        public IPointSetFilter[] PointSetFilters { get; set; }
+        public ITreeFilter[] TreeFilters { get; set; } = Array.Empty<ITreeFilter>();
+        public IPointSetFilter[] PointSetFilters { get; set; } = Array.Empty<IPointSetFilter>();
         public float MeshWidth { get; set; } = 0.1f;
-        public int MinimalPointsPerMesh { get; set; } = 10;
+        public int MinimalPointsPerMesh { get; set; } = 2;
     }
     public class MergingParameters
     {

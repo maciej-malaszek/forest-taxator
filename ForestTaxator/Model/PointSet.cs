@@ -8,29 +8,29 @@ namespace ForestTaxator.Model
 {
     public class PointSet : IEnumerable<CloudPoint>
     {
-        private Point _centerPoint;
-        private bool _boundingBoxDeprecated;
+        protected Point CenterPoint;
+        protected bool BoundingBoxDeprecated;
         private Box _boundingBox;
 
         public Point Center
         {
             get
             {
-                return _centerPoint ??= new Point()
+                return CenterPoint ??= new Point()
                 {
                     X = Points.Sum(x => x.X) / Points.Count,
                     Y = Points.Sum(x => x.Y) / Points.Count,
                     Z = Points.Sum(x => x.Z) / Points.Count,
                 };
             }
-            private set => _centerPoint = value;
+            private set => CenterPoint = value;
         }
 
         public Box BoundingBox
         {
             get
             {
-                if (_boundingBoxDeprecated)
+                if (BoundingBoxDeprecated)
                 {
                     return BoundingBox = Box.Find(this);
                 }
@@ -40,7 +40,7 @@ namespace ForestTaxator.Model
             private set
             {
                 _boundingBox = value;
-                _boundingBoxDeprecated = false;
+                BoundingBoxDeprecated = false;
             }
         }
 
@@ -48,7 +48,7 @@ namespace ForestTaxator.Model
         public Point P2 { get; private set; }
 
 
-        private List<CloudPoint> Points { get; set; } = new List<CloudPoint>();
+        protected internal List<CloudPoint> Points { get; set; } = new();
 
         public bool Empty => Points.Count == 0;
 
@@ -56,21 +56,21 @@ namespace ForestTaxator.Model
 
         public PointSet()
         {
-            _boundingBoxDeprecated = true;
-            _centerPoint = new Point();
+            BoundingBoxDeprecated = true;
+            CenterPoint = new Point();
         }
 
         public PointSet(IList<CloudPoint> points)
         {
             Points.AddRange(points);
-            _boundingBoxDeprecated = true;
-            _centerPoint = new Point();
+            BoundingBoxDeprecated = true;
+            CenterPoint = new Point();
         }
 
         public void RecalculateBoundingBox()
         {
             _boundingBox = Box.Find(this);
-            _boundingBoxDeprecated = false;
+            BoundingBoxDeprecated = false;
             P1 = BoundingBox.P1;
             P2 = BoundingBox.P2;
         }
@@ -87,7 +87,7 @@ namespace ForestTaxator.Model
             BoundingBox.P1 = center.Clone();
             BoundingBox.P2 = center.Clone();
 
-            _boundingBoxDeprecated = false;
+            BoundingBoxDeprecated = false;
         }
 
         public void Add(CloudPoint point)
@@ -105,21 +105,21 @@ namespace ForestTaxator.Model
             P2.X = Math.Max(P2.X, point.X);
             P2.Y = Math.Max(P2.Y, point.Y);
             P2.Z = Math.Max(P2.Z, point.Z);
-            _centerPoint = null;
+            CenterPoint = null;
         }
         
         public void Clear() => Points.Clear();
 
         public void Remove(CloudPoint point)
         {
-            _centerPoint = null;
+            CenterPoint = null;
             if (point.OwningSet != this)
             {
                 return;
             }
 
             Points.Remove(point);
-            _boundingBoxDeprecated = true;
+            BoundingBoxDeprecated = true;
         }
 
         public void MoveTo(PointSet otherSet)
@@ -131,8 +131,8 @@ namespace ForestTaxator.Model
                 otherSet.Add(p);
             }
 
-            _boundingBoxDeprecated = true;
-            _centerPoint = null;
+            BoundingBoxDeprecated = true;
+            CenterPoint = null;
         }
 
         public PointSet Clone()
@@ -218,36 +218,6 @@ namespace ForestTaxator.Model
 
             return slices;
         }
-        
-        public Terrain FindTerrain(Box analyzedBox)
-        {
-            var terrain = new Terrain();
-            var box = analyzedBox.Intersect(BoundingBox);
-            foreach (var cloudPoint in Points)
-            {
-                if (box.Contains(cloudPoint) == false)
-                {
-                    continue;
-                }
-
-                // ReSharper disable PossibleLossOfFraction
-                var x = (int)(cloudPoint.X / Terrain.MeshSize + Terrain.MeshesCount / 2);
-                var y = (int)(cloudPoint.Y / Terrain.MeshSize + Terrain.MeshesCount / 2);
-                // ReSharper restore PossibleLossOfFraction
-                if (x is < 0 or >= Terrain.MeshesCount || y is < 0 or >= Terrain.MeshesCount)
-                {
-                    continue;
-                }
-
-                if (terrain.Mesh[x, y] > cloudPoint.Z)
-                {
-                    terrain.Mesh[x, y] = cloudPoint.Z;
-                }
-            }
-
-            return terrain;
-        }
-
         public Tree.Node FindBestNode(IList<Tree> potentialTrees, MergingParameters parameters)
         {
             double bestDistance = int.MaxValue;

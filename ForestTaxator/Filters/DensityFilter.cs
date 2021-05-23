@@ -12,7 +12,7 @@ namespace ForestTaxator.Filters
         public float Density { get; set; }
 
         public float MeshWidth { get; set; }
-        public DensityFilter(float density = 20000, float meshWidth = 0.01f)
+        public DensityFilter(float density = 20000, float meshWidth = 0.05f)
         {
             MeshWidth = meshWidth;
             Density = density;
@@ -25,11 +25,6 @@ namespace ForestTaxator.Filters
         
         private PointSet ReduceGroup(PointSet pointSet)
         {
-            var maxPointsCount = (int)(pointSet.BoundingBox.Depth * pointSet.BoundingBox.Width * Density);
-            if (pointSet.Count <= maxPointsCount)
-            {
-                return pointSet;
-            }
             var maxPointPerMesh = (int)Math.Ceiling(Density * MeshWidth * MeshWidth);
             var rasterGrid = new RasterGrid(pointSet, MeshWidth);
             for (var x = 0; x < rasterGrid.MeshCount; x++)

@@ -7,6 +7,12 @@ namespace ForestTaxator.Utils
     {
         private double[] _data;
         public long Size => _data.Length;
+        
+        public Distribution(int size)
+        {
+            _data = new double[size];
+        }
+
         public Distribution(IList<int> data)
         {
             _data = data?.Select(x => (double) x).ToArray();

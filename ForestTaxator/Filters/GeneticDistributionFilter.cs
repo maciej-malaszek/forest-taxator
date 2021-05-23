@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using ForestTaxator.Extensions;
 using ForestTaxator.Model;
 using ForestTaxator.Utils;
@@ -41,7 +40,7 @@ namespace ForestTaxator.Filters
 
         public IFitnessFunction GetFitnessFunction() => new FitnessFunction(Fitness);
 
-        private static IList<Distribution> GenerateDistributions(ParabolicParameters parameters, int steps)
+        protected static IList<Distribution> GenerateDistributions(ParabolicParameters parameters, int steps)
         {
             var dataX = new double[steps];
             var dataY = new double[steps];
@@ -55,7 +54,7 @@ namespace ForestTaxator.Filters
             return new[] { new Distribution(dataX), new Distribution(dataY) };
         }
         
-        private double Fitness(IPhenotype p)
+        protected virtual double Fitness(IPhenotype p)
         {
             var phenotype = (CollectivePhenotype<ParabolicParameters>) p;
 
@@ -79,7 +78,7 @@ namespace ForestTaxator.Filters
             return fitness.Max();
         }
 
-        private IIndividual FindBestParameters(PointSet group)
+        protected virtual IIndividual FindBestParameters(PointSet group)
         {
             if (group == null || group.Center.Z < 0.1)
             {
@@ -110,7 +109,19 @@ namespace ForestTaxator.Filters
 
             var bestPossibleParameters = FindBestParameters(pointSet);
             var fitness = Fitness(bestPossibleParameters.Phenotype);
-            return fitness <= GetTrunkThreshold(pointSet.Center.Z);
+            
+            var isTrunk = fitness <= GetTrunkThreshold(pointSet.Center.Z);
+            if (!isTrunk)
+            {
+                return false;
+            }
+
+            foreach (var t in pointSet)
+            {
+                t.Intensity = (float) fitness;
+            }
+
+            return true;
         }
     }
 

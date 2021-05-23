@@ -60,5 +60,10 @@ namespace ForestTaxator.Model
             Array.Copy(BitConverter.GetBytes(Z),0, data,16, 8);
             return data;
         }
+
+        public override string ToString()
+        {
+            return $"{X:0.########} {Y:0.########} {Z:0.########}";
+        }
     }
 }

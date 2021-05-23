@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using CommandLine;
@@ -54,12 +55,12 @@ namespace ForestTaxator.TestApp
             {
                 StopConditions = new IStopCondition[]
                 {
-                    new TimeSpanCondition(TimeSpan.FromSeconds(0.2)),
+                    new TimeSpanCondition(TimeSpan.FromSeconds(0.3f)),
                     new PopulationDegradation(0.9f),
                     new SufficientIndividual(fitnessFunction, threshold-0.001f)
                 },
                 StopConditionMode = EStopConditionMode.Any,
-                Population = new Population(fitnessFunction, 50)
+                Population = new Population(fitnessFunction, 60)
                 {
                     CompareCriteria = compareCriteria,
                     Crossover = new SinglePointCrossover(),
@@ -117,14 +118,15 @@ namespace ForestTaxator.TestApp
             using var reader = new XyzReader(detectVerb.InputFile, Encoding.ASCII);
             var cloud = new Cloud(reader);
             Console.WriteLine("File read.");
+            cloud.NormalizeHeight();
+            
             var treeDetector = new TreeDetector();
 
             IPointSetFilter[] pointSetFilters =
             {
-                 new LargeGroupsFilter(0.7f),
-                new AspectRatioFilter(0.65f, 1.5f),
-                new SmallGroupsFilter(),
-                new DensityFilter(),
+                new LargeGroupsFilter(p => Math.Max(0.1f, 0.75f - 0.01f*p)),
+                new AspectRatioFilter(0.85f, 1.2f),
+                new SmallGroupsFilter( p => Math.Max(0.05f, 0.3f - 0.02f*p)),
                 PrepareFilter()
             };
 
@@ -132,9 +134,31 @@ namespace ForestTaxator.TestApp
             var detectionParameters = new DetectionParameters
             {
                 PointSetFilters = pointSetFilters
-            }; 
+            };
+            var mergingParameters = new MergingParameters()
+            {
+                MinimumRegressionGroupingDistance = 0.09,
+                MaximumGroupingEmptyHeight = 20,
+                MinimumGroupingDistance = 0.35,
+            };
             var x = 0;
-            var pointSetGroups = treeDetector.DetectTrunkPointSets(cloud, detectionParameters).ToList();
+            
+            // var trees = treeDetector.DetectPotentialTrees(cloud, detectionParameters, mergingParameters).ToList();
+            //
+            // Directory.CreateDirectory(detectVerb.OutputDirectory);
+            //
+            // foreach (var tree in trees)
+            // {
+            //     using var writer = new XyzWriter($"{detectVerb.OutputDirectory}/T{x++}.xyz");
+            //     foreach (var node in tree.GetAllNodesAsVector())
+            //     {
+            //         writer.WritePointSet(node.PointSet);
+            //     }
+            // }
+            //
+            var pointSetGroups  = treeDetector.DetectTrunkPointSets(cloud, detectionParameters).ToList();
+            using var writer = new XyzWriter($"{detectVerb.OutputDirectory}/trunk.xyz");
+            
             foreach (var pointSetGroup in pointSetGroups)
             {
                 var pointSetSize = pointSetGroup.PointSets.Select(pointSet => pointSet.Count).Sum();
@@ -142,10 +166,11 @@ namespace ForestTaxator.TestApp
                 {
                     continue;
                 }
-
-                Console.WriteLine($"Point set size: {pointSetSize}");
-                using var writer = new XyzWriter($"output/{x++}.xyz");
-                writer.WritePointSetGroup(pointSetGroup);
+            
+                foreach (var t in pointSetGroup.PointSets)
+                {
+                    writer.WritePointSet(t);
+                }
             }
         }
     }

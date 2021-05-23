@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using ForestTaxator.Model;
 
 namespace ForestTaxator.Filters
 {
     public class LargeGroupsFilter : IPointSetFilter
     {
-        public float MaxSize { get; set; }
+        public Func<double, double> MaxSize { get; }
 
-        public LargeGroupsFilter(float maxSize = 0.5f)
+        public LargeGroupsFilter(Func<double, double> maxSize)
         {
             MaxSize = maxSize;
         }
@@ -27,7 +26,7 @@ namespace ForestTaxator.Filters
                 return false;
             }
 
-            return Math.Max(pointSet.BoundingBox.Width, pointSet.BoundingBox.Depth) <= MaxSize;
+            return Math.Max(pointSet.BoundingBox.Width, pointSet.BoundingBox.Depth) <= MaxSize(pointSet.Center.Z);
         }
     }
 }

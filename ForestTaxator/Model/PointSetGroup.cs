@@ -23,6 +23,10 @@ namespace ForestTaxator.Model
 
         public PointSetGroup Filter(params IPointSetFilter[] filters)
         {
+            if (PointSets?.FirstOrDefault() == null)
+            {
+                return null;
+            }
             Console.WriteLine($"Starting on height {PointSets.FirstOrDefault()?.Center?.Z ?? 0}");
             var stopwatch = new Stopwatch();
             stopwatch.Start();

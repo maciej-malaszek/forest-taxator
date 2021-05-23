@@ -358,7 +358,10 @@ namespace ForestTaxator.Model
                 return nodes.ToArray();
             }
 
-            if (Root != null && Root.Children.Count > 0 && Math.Round(Root.Children[0].Center.Z, 1, MidpointRounding.ToEven) == Math.Round(height, 1, MidpointRounding.ToEven))
+            if (Root != null 
+                && Root.Children.Count > 0 
+                && Math.Round(Root.Children[0].Center.Z, 1, MidpointRounding.ToEven) == Math.Round(height, 1, MidpointRounding.ToEven)
+            )
             {
                 foreach (var child in Root.Children)
                 {

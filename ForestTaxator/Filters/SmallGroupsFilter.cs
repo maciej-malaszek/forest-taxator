@@ -8,8 +8,8 @@ namespace ForestTaxator.Filters
 {
     public class SmallGroupsFilter : IPointSetFilter
     {
-        public float MinimalSize { get; set; }
-        public SmallGroupsFilter(float minimalSize = 0.05f)
+        public Func<double, double> MinimalSize { get; }
+        public SmallGroupsFilter(Func<double, double> minimalSize)
         {
             MinimalSize = minimalSize;
         }
@@ -25,7 +25,7 @@ namespace ForestTaxator.Filters
                 return false;
             }
 
-            return Math.Max(pointSet.BoundingBox.Width, pointSet.BoundingBox.Depth) >= MinimalSize;
+            return Math.Max(pointSet.BoundingBox.Width, pointSet.BoundingBox.Depth) >= MinimalSize(pointSet.Center.Z);
         }
     }
 }

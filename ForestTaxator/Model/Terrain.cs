@@ -1,19 +1,41 @@
-﻿namespace ForestTaxator.Model
+﻿using System;
+using System.Collections.Generic;
+
+namespace ForestTaxator.Model
 {
     public class Terrain
     {
-        public const int MeshesCount = 500;
-        public const float MeshSize = 2.5f;
+        public double MeshSize { get; }
 
-        public double[,] Mesh { get; } = new double[MeshesCount,MeshesCount];
+        private readonly Dictionary<Tuple<int, int>, double> _heightMap;
 
-        public Terrain()
+        public Terrain(PointSet cloud, double meshSize = 2.5)
         {
-            for (var x = 0; x < MeshesCount; x++)
-            for (var y = 0; y < MeshesCount; y++)
+            MeshSize = meshSize;
+            _heightMap = new Dictionary<Tuple<int, int>, double>();
+            
+            foreach (var cloudPoint in cloud)
             {
-                Mesh[x,y] = float.MaxValue;
+                var key = GetKey(cloudPoint);
+                
+                if (!_heightMap.ContainsKey(key) || _heightMap[key] > cloudPoint.Z)
+                {
+                    _heightMap[key] = cloudPoint.Z;
+                }
             }
+        }
+
+        public double GetHeight(Point point)
+        {
+            var key = GetKey(point);
+            return _heightMap[key];
+        }
+
+        private Tuple<int, int> GetKey(Point point)
+        {
+            var x = (int)(point.X / MeshSize);
+            var y = (int)(point.Y / MeshSize);
+            return new Tuple<int, int>(x, y);
         }
     }
 }

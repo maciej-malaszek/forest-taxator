@@ -7,6 +7,8 @@ namespace ForestTaxator.Model
     {
         private Point _p1;
         private Point _p2;
+        
+        // Most -X, -Y, -Z
         public Point P1 { 
             get => _p1;
             set { 
@@ -14,6 +16,8 @@ namespace ForestTaxator.Model
                 _center = null;
             }
         }
+        
+        // Most +X, +Y, +Z
         public Point P2 { 
             get => _p2;
             set { 
