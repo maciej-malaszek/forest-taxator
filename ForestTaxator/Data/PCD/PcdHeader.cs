@@ -36,7 +36,8 @@ namespace ForestTaxator.Data.PCD
         {
             ASCII,
             BINARY,
-            UNSUPPORTED
+            UNSUPPORTED,
+            BINARY_COMPRESSED
         }
 
         #endregion
@@ -53,10 +54,12 @@ namespace ForestTaxator.Data.PCD
         public double[] Viewpoint { get; set; }
         public ulong Points { get; set; }
         public EDataType DataType { get; set; }
+        
+        public int HeaderBytes { get; private set; }
 
         #endregion
 
-        public PcdHeader(TextReader reader)
+        public PcdHeader(StreamReader reader)
         {
             var headerFields = ReadHeader(reader);
 
@@ -70,6 +73,8 @@ namespace ForestTaxator.Data.PCD
             Points = Convert.ToUInt64(headerFields["POINTS"][0]);
             Type = headerFields["TYPE"].Select(EnumParse<EType>).ToArray();
             DataType = EnumParse<EDataType>(headerFields["DATA"][0].ToUpper());
+
+            reader.BaseStream.Seek(0, SeekOrigin.Begin);
         }
 
         #region Functions
@@ -105,24 +110,27 @@ namespace ForestTaxator.Data.PCD
             return success ? result : Enum.Parse<T>("UNSUPPORTED");
         }
 
-        private static Dictionary<string, string[]> ReadHeader(TextReader reader)
+        private Dictionary<string, string[]> ReadHeader(TextReader reader)
         {
             var header = new Dictionary<string, string[]>();
             do
             {
-                var line = reader.ReadLine()?.Split(" ");
+                var line = reader.ReadLine();
                 if (line == null)
                 {
                     return header;
                 }
 
-                if (line[0].StartsWith("#"))
+                HeaderBytes += line.Length + 1; // number of characters + new line. DO NOT multiply by char, because we read ASCII file
+                var fields = line?.Split(" ");
+
+                if (fields[0].StartsWith("#"))
                 {
                     continue;
                 }
 
-                header.Add(line[0], line.Skip(1).ToArray());
-            } while (header.Count == 0 || header.Last().Key.StartsWith("DATA") == false);
+                header.Add(fields[0], fields.Skip(1).ToArray());
+            } while (header.Count == 0 || header.Keys.Contains("DATA") == false);
 
             return header;
         }

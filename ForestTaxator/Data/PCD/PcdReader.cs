@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
+using ForestTaxator.Data.Compression;
 using ForestTaxator.Model;
 
 namespace ForestTaxator.Data.PCD
@@ -10,6 +12,7 @@ namespace ForestTaxator.Data.PCD
         private readonly StreamReader _streamReader;
         private readonly BinaryReader _binaryReader;
         private readonly FileInfo _fileInfo;
+        private long _pointIndex;
 
         public void Dispose()
         {
@@ -81,6 +84,47 @@ namespace ForestTaxator.Data.PCD
             return p;
         }
 
+
+        private CloudPoint ReadBinaryPointFromOrdered()
+        {
+            var p = new CloudPoint();
+            // Points are stored as XXXYYYZZZIII instead of XYZIXYZIXYZI
+            for (var i = 0; i < Header.Fields.Length; i++)
+            {
+                var position = (long)Header.Points * (long) Header.Size[i] * i; // skip all points for previous dimensions
+                position += _pointIndex;
+                _binaryReader.BaseStream.Seek(position, SeekOrigin.Begin);
+                var bytes = _binaryReader.ReadBytes((int) Header.Size[i]);
+                switch (i)
+                {
+                    case 2:
+                        _pointIndex+=(long)Header.Size[i];
+                        break;
+                    case >= 3:
+                        continue;
+                }
+
+                p[i] = (Header.Type[i], Header.Size[i]) switch
+                {
+                    (PcdHeader.EType.I, PcdHeader.ESize.Byte) => bytes[0] - 128,
+                    (PcdHeader.EType.I, PcdHeader.ESize.Short) => BitConverter.ToInt16(bytes),
+                    (PcdHeader.EType.I, PcdHeader.ESize.Single) => BitConverter.ToInt32(bytes),
+                    (PcdHeader.EType.I, PcdHeader.ESize.Double) => BitConverter.ToInt64(bytes),
+                    (PcdHeader.EType.U, PcdHeader.ESize.Byte) => bytes[0],
+                    (PcdHeader.EType.U, PcdHeader.ESize.Short) => BitConverter.ToUInt16(bytes),
+                    (PcdHeader.EType.U, PcdHeader.ESize.Single) => BitConverter.ToUInt32(bytes),
+                    (PcdHeader.EType.U, PcdHeader.ESize.Double) => BitConverter.ToUInt64(bytes),
+                    (PcdHeader.EType.F, PcdHeader.ESize.Byte) => BitConverter.ToSingle(bytes),
+                    (PcdHeader.EType.F, PcdHeader.ESize.Short) => BitConverter.ToSingle(bytes),
+                    (PcdHeader.EType.F, PcdHeader.ESize.Single) => BitConverter.ToSingle(bytes),
+                    (PcdHeader.EType.F, PcdHeader.ESize.Double) => BitConverter.ToDouble(bytes),
+                    _ => p[i]
+                };
+            }
+
+            return p;
+        }
+        
         public CloudPoint ReadPoint()
         {
             if (IsValid == false)
@@ -92,6 +136,7 @@ namespace ForestTaxator.Data.PCD
             {
                 PcdHeader.EDataType.ASCII => ReadAsciiPoint(),
                 PcdHeader.EDataType.BINARY => ReadBinaryPoint(),
+                PcdHeader.EDataType.BINARY_COMPRESSED => ReadBinaryPointFromOrdered(),
                 PcdHeader.EDataType.UNSUPPORTED => null,
                 _ => null
             };
@@ -136,9 +181,29 @@ namespace ForestTaxator.Data.PCD
             var bufferedStream = new BufferedStream(fileStream, 4096);
             _streamReader = new StreamReader(bufferedStream);
             Header = new PcdHeader(_streamReader);
+
             if (Header.DataType == PcdHeader.EDataType.BINARY)
             {
                 _binaryReader = new BinaryReader(bufferedStream);
+                _binaryReader.ReadBytes(Header.HeaderBytes);
+            }
+
+            if (Header.DataType == PcdHeader.EDataType.BINARY_COMPRESSED)
+            {
+                _pointIndex = 0;
+                using var binaryReader = new BinaryReader(bufferedStream);
+                var headerBytes = binaryReader.ReadBytes(Header.HeaderBytes);
+                var compressedDataBytes = binaryReader.ReadUInt32();
+                var uncompressedDataBytes = binaryReader.ReadUInt32();
+                if (Header.HeaderBytes + compressedDataBytes + 8 != bufferedStream.Length)
+                {
+                    // Add some validation log here
+                }
+
+                var fileContent = binaryReader.ReadBytes((int) compressedDataBytes);
+                var decompressed = CLZF2.Decompress(fileContent);
+                var memoryStream = new MemoryStream(decompressed);
+                _binaryReader = new BinaryReader(memoryStream);
             }
         }
     }

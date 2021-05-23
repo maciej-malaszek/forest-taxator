@@ -33,12 +33,12 @@ namespace ForestTaxator.Data.XYZ
 
         public void WritePoint(CloudPoint point)
         {
-            _streamWriter.WriteLine($"{point.X} {point.Y} {point.Z} {point.Intensity}");
+            _streamWriter.WriteLine($"{point.X:0.########} {point.Y:0.########} {point.Z:0.########} {point.Intensity:0.########}");
         }
 
         public void WritePoint(Point point)
         {
-            _streamWriter.WriteLine($"{point.X} {point.Y} {point.Z}");
+            _streamWriter.WriteLine($"{point.X:0.########} {point.Y:0.########} {point.Z:0.########}");
         }
 
         public void WritePointSet(PointSet pointSet)
@@ -53,14 +53,15 @@ namespace ForestTaxator.Data.XYZ
 
         public void WritePointSetGroup(PointSetGroup pointSetGroup)
         {
-            var pointSetSize = pointSetGroup.PointSets.Select(pointSet => pointSet.Count).Sum();
-            Console.WriteLine(pointSetSize);
             foreach (var pointSet in pointSetGroup.PointSets)
             {
                 foreach (var point in pointSet)
                 {
                     WritePoint(point);
                 }
+                _streamWriter.Flush();
+                _bufferedStream.Flush();
+                _fileStream.Flush();
             }
             _streamWriter.Flush();
         }
