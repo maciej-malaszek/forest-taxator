@@ -118,7 +118,8 @@ namespace ForestTaxator.Model
             Euclidean, EDimension.X,
             EDimension.Y);
 
-        
+        public double Intensity { get; set; }
+
 
         public bool Contains(Point point)
         {

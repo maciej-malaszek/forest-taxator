@@ -12,7 +12,7 @@ namespace ForestTaxator.Extensions
             {
                 var p = new CloudPoint(ellipsis.Center.X + x * resolution, ellipsis.Center.Y + y * resolution, ellipsis.Center.Z)
                 {
-                    Intensity = 1000
+                    Intensity = (float)ellipsis.Intensity
                 };
 
                 if (ellipsis.Contains(p))

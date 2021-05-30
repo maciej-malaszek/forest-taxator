@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ForestTaxator.Algorithms;
+using ForestTaxator.Utils;
 
 namespace ForestTaxator.Model
 {
@@ -196,6 +197,7 @@ namespace ForestTaxator.Model
             var minZ = box.P1.Z;
             var maxZ = box.P2.Z;
             var slices = new PointSlice[(int)Math.Ceiling((maxZ - minZ) / sliceHeight)];
+            var step = 0;
 
             foreach (var cloudPoint in Points)
             {
@@ -214,6 +216,7 @@ namespace ForestTaxator.Model
                     slices[z].PointSets.Add(new PointSet());
                 }
                 slices[z].PointSets[0].Add(cloudPoint);
+                ProgressTracker.Progress(EProgressStage.Slicing, "Slicing Cloud of Points", step++, Points.Count);
             }
 
             return slices;
@@ -236,7 +239,7 @@ namespace ForestTaxator.Model
                     }
                 }
 
-                var treeNode = tree.GetNearestNode(Center, out var distance);
+                var treeNode = tree.GetNearestNode(Center, out var distance, parameters.SliceHeight);
 
                 if (treeNode == null)
                 {

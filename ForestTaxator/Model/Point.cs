@@ -65,5 +65,15 @@ namespace ForestTaxator.Model
         {
             return $"{X:0.########} {Y:0.########} {Z:0.########}";
         }
+
+        public static Point operator -(Point p1, Point p2)
+        {
+            return new(p1.X - p2.X, p1.Y - p2.Y, p1.Z - p2.Z);
+        }
+        
+        public static Point operator +(Point p1, Point p2)
+        {
+            return new(p1.X + p2.X, p1.Y + p2.Y, p1.Z + p2.Z);
+        }
     }
 }

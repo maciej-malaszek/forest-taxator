@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using ForestTaxator.Algorithms;
 using ForestTaxator.Filters;
+using ForestTaxator.Utils;
 
 namespace ForestTaxator.Model
 {
@@ -27,18 +25,14 @@ namespace ForestTaxator.Model
             {
                 return null;
             }
-            Console.WriteLine($"Starting on height {PointSets.FirstOrDefault()?.Center?.Z ?? 0}");
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
             var pointSets = filters.Aggregate(PointSets, (current, filter) => filter.Filter(current));
-            stopwatch.Stop();
-            Console.WriteLine($"Last slice calculation time: {stopwatch.Elapsed.TotalSeconds}");
             return new PointSetGroup(pointSets);
         }
 
         public IList<Tree> BuildTrees(MergingParameters parameters)
         {
             var potentialTrees = new List<Tree>();
+            var index = 0;
             foreach (var pointSet in PointSets)
             {
                 var node = pointSet.FindBestNode(potentialTrees, parameters);
@@ -86,6 +80,7 @@ namespace ForestTaxator.Model
                         }
                     }
                 }
+                ProgressTracker.Progress(EProgressStage.TreeBuilding, "Building Trees", index++, PointSets.Count);
             }
 
             return potentialTrees;

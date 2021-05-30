@@ -1,7 +1,5 @@
 ﻿using GeneticToolkit.Interfaces;
 using GeneticToolkit.Utils;
-
-using System;
 using System.Collections.Generic;
 
 namespace ForestTaxator.Model
@@ -24,6 +22,9 @@ namespace ForestTaxator.Model
         public float Y1 { get => _parameters[1]; set => _parameters[1] = value; }
         public float X2 { get => _parameters[2]; set => _parameters[2] = value; }
         public float Y2 { get => _parameters[3]; set => _parameters[3] = value; }
+
+        public Point F1 => new(X1, X2, 0);
+        public Point F2 => new(X1, X2, 0);
         public float A { get => _parameters[4]; set => _parameters[4] = value; }
 
         public byte[] Serialize()
