@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using CommandLine;
 using ConsoleProgressBar;
 using ForestTaxator.Algorithms;
@@ -13,6 +14,7 @@ using ForestTaxator.Extensions;
 using ForestTaxator.Filters;
 using ForestTaxator.Model;
 using ForestTaxator.TestApp.Commands;
+using ForestTaxator.TestApp.Commands.Analyze;
 using ForestTaxator.Utils;
 using GeneticToolkit;
 using GeneticToolkit.Comparisons;
@@ -37,6 +39,7 @@ namespace ForestTaxator.TestApp
     class Program
     {
         private static HierarchicalProgress _consoleProgressBar;
+
         static void Main(string[] args)
         {
             using var progressBar = new ProgressBar
@@ -47,17 +50,33 @@ namespace ForestTaxator.TestApp
             };
             _consoleProgressBar = progressBar.HierarchicalProgress.Fork(1);
 
-            Parser.Default.ParseArguments<DetectVerb, ConvertVerb>(args)
-                .WithParsed<DetectVerb>(DetectTree)
-                .WithParsed<ConvertVerb>(ConvertFile);
+            var parsed = Parser.Default.ParseSetArguments<AnalyzeVerbSet, ConvertVerb>(args, OnVerbSetParsed);
+            parsed.MapResult<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand, Task>
+            (
+                _ => Task.CompletedTask,
+                _ => Task.CompletedTask,
+                _ => Task.CompletedTask,
+                _ => Task.CompletedTask,
+                _ => Task.CompletedTask,
+                _ => Task.CompletedTask
+            );
             _consoleProgressBar.Dispose();
+        }
+
+        private static ParserResult<object> OnVerbSetParsed(Parser parser,
+            Parsed<object> parsed, IEnumerable<string> argsToParse, bool containedHelpOrVersion)
+        {
+            return parsed.MapResult(
+                (AnalyzeVerbSet _) => parser
+                    .ParseArguments<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand>(argsToParse),
+                _ => parsed);
         }
 
         private static GeneticEllipseMatch PrepareGeneticEllipseMatchAlgorithm()
         {
             var geneticEllipseMatch = new GeneticEllipseMatch
             {
-                BufferWidth = 0.005,
+                BufferWidth = 0.002,
                 EccentricityThreshold = 0.85,
             };
             var fitnessFunction = geneticEllipseMatch.GetFitnessFunction();
@@ -70,12 +89,12 @@ namespace ForestTaxator.TestApp
             {
                 StopConditions = new IStopCondition[]
                 {
-                    new TimeSpanCondition(TimeSpan.FromSeconds(0.35f)),
+                    new TimeSpanCondition(TimeSpan.FromSeconds(25f)),
                     new PopulationDegradation(0.9f),
-                    new SufficientIndividual(fitnessFunction, 0.005f)
+                    new SufficientIndividual(fitnessFunction, 0.0001f)
                 },
                 StopConditionMode = EStopConditionMode.Any,
-                Population = new Population(fitnessFunction, 60)
+                Population = new Population(fitnessFunction, 30)
                 {
                     CompareCriteria = compareCriteria,
                     Crossover = new SinglePointCrossover(),
@@ -106,7 +125,7 @@ namespace ForestTaxator.TestApp
                 }
             };
             geneticEllipseMatch.GeneticAlgorithm = geneticAlgorithm;
-            
+
             return geneticEllipseMatch;
         }
 
@@ -114,7 +133,7 @@ namespace ForestTaxator.TestApp
         {
             var filter = new EllipsisMatchFilter
             {
-                FitnessThreshold = 0.01,
+                FitnessThreshold = 0.1,
                 EccentricityThreshold = 0.80,
                 GeneticEllipseMatch = new GeneticEllipseMatch
                 {
@@ -229,7 +248,7 @@ namespace ForestTaxator.TestApp
             return geneticDistributionFilter;
         }
 
-        private static void ConvertFile(ConvertVerb convertVerb)
+        private static Task ConvertFile(ConvertVerb convertVerb)
         {
             ICloudStreamReader reader = convertVerb.InputFormat.ToLowerInvariant() switch
             {
@@ -246,21 +265,22 @@ namespace ForestTaxator.TestApp
             };
 
             writer.WritePointSet(reader.ReadPointSet());
+            return Task.CompletedTask;
         }
 
-        
+
         private static void Report(string status, double step, double total)
         {
-            _consoleProgressBar.Report(step/total, status);
+            _consoleProgressBar.Report(step / total, status);
         }
 
-        private static void DetectTree(DetectVerb detectVerb)
+        private static Task DetectTree(DetectVerb detectVerb)
         {
-            ProgressTracker.Actions[EProgressStage.Slicing] = new Action<string,double,double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.NoiseFiltering] = new Action<string,double,double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.TreeApproximation] = new Action<string,double,double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.FakeTreesFiltering] = new Action<string,double,double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.TreeBuilding] = new Action<string,double,double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.Slicing] = new Action<string, double, double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.NoiseFiltering] = new Action<string, double, double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.TreeApproximation] = new Action<string, double, double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.FakeTreesFiltering] = new Action<string, double, double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.TreeBuilding] = new Action<string, double, double>[] {Report};
             using var reader = new XyzReader(detectVerb.InputFile, Encoding.ASCII);
             var cloud = new Cloud(reader);
             cloud.NormalizeHeight();
@@ -288,31 +308,32 @@ namespace ForestTaxator.TestApp
                 MinimumGroupingDistance = 0.35,
             };
             var x = 0;
-            
+
             Directory.CreateDirectory(detectVerb.OutputDirectory);
 
             var trees = treeDetector.DetectPotentialTrees(cloud, detectionParameters, mergingParameters).ToList();
-            
-            
-            var approximation = new TreeApproximation(PrepareGeneticEllipseMatchAlgorithm(), 0.8, 0.09);
+
+
+            var approximation = new TreeApproximation(PrepareGeneticEllipseMatchAlgorithm(), 0.8, 0.01f);
             foreach (var detectedTree in trees)
             {
                 var tree = approximation.ApproximateTree(detectedTree, terrain);
                 using var writer1 = new XyzWriter($"{detectVerb.OutputDirectory}/T{x++}.e.xyz");
                 using var writer2 = new XyzWriter($"{detectVerb.OutputDirectory}/T{x++}.xyz");
-                var ellipses = tree.GetAllNodesAsVector().Select(node => node.Ellipse);
+                var ellipses = tree.GetAllNodesAsVector().Select(node => node.Ellipse).Where(ellipsis => ellipsis != null);
                 foreach (var ellipse in ellipses)
                 {
                     ellipse.ExportToStream(writer1);
                 }
+
                 foreach (var node in tree.GetAllNodesAsVector())
                 {
                     writer2.WritePointSet(node.PointSet);
                 }
             }
 
-           
-            
+            return Task.CompletedTask;
+
             // var pointSetGroups = treeDetector.DetectTrunkPointSets(cloud, detectionParameters).ToList();
             // using var writer = new XyzWriter($"{detectVerb.OutputDirectory}/trunk.xyz");
             //

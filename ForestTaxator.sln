@@ -1,8 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForestTaxator", "ForestTaxator\ForestTaxator.csproj", "{231D5E2E-E6A1-4C7A-A816-C629D786057B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForestTaxator.Lib", "ForestTaxator.Lib\ForestTaxator.Lib.csproj", "{231D5E2E-E6A1-4C7A-A816-C629D786057B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForestTaxator.TestApp", "ForestTaxator.TestApp\ForestTaxator.TestApp.csproj", "{293EBC31-91B0-4EE9-A6E6-44C571AF575A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForestTaxator.Application", "ForestTaxator.Application\ForestTaxator.Application.csproj", "{293EBC31-91B0-4EE9-A6E6-44C571AF575A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForestTaxator.UnitTests", "ForestTaxator.UnitTests\ForestTaxator.UnitTests.csproj", "{76FB8C16-ED2D-4A6D-9EFD-9E9EDF5DE708}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +20,9 @@ Global
 		{293EBC31-91B0-4EE9-A6E6-44C571AF575A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{293EBC31-91B0-4EE9-A6E6-44C571AF575A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{293EBC31-91B0-4EE9-A6E6-44C571AF575A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76FB8C16-ED2D-4A6D-9EFD-9E9EDF5DE708}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76FB8C16-ED2D-4A6D-9EFD-9E9EDF5DE708}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76FB8C16-ED2D-4A6D-9EFD-9E9EDF5DE708}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76FB8C16-ED2D-4A6D-9EFD-9E9EDF5DE708}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

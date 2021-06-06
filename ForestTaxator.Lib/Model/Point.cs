@@ -52,7 +52,7 @@ namespace ForestTaxator.Model
             };
         }
 
-        public virtual byte[] Serialize()
+        public virtual byte[] BinarySerialized()
         {
             var data = new byte[32];
             Array.Copy(BitConverter.GetBytes(X),data,8);
@@ -61,9 +61,14 @@ namespace ForestTaxator.Model
             return data;
         }
 
-        public override string ToString()
+        public virtual string StringSerialized()
         {
             return $"{X:0.########} {Y:0.########} {Z:0.########}";
+        }
+
+        public override string ToString()
+        {
+            return StringSerialized();
         }
 
         public static Point operator -(Point p1, Point p2)

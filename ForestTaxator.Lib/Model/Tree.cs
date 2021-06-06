@@ -13,23 +13,28 @@ namespace ForestTaxator.Model
         private static IList<Node> GetNodeByHeight(Node node, double height, bool withLeafs)
         {
             var nodes = new List<Node>();
-            if (node.Children.Count > 0 && Math.Round(node.Children[0].Center.Z, 1, MidpointRounding.ToEven) == Math.Round(height, 1, MidpointRounding.ToEven))
+            if (node.Children.Count > 0 && Math.Round(node.Children[0].Center.Z, 1, MidpointRounding.ToEven) ==
+                Math.Round(height, 1, MidpointRounding.ToEven))
             {
                 nodes.AddRange(node.Children);
                 return nodes;
             }
+
             if (withLeafs && node.Children.Count == 0)
             {
                 nodes.Add(node);
                 return nodes;
             }
+
             foreach (var child in node.Children)
             {
                 var temp = GetNodeByHeight(child, height, withLeafs);
                 nodes.AddRange(temp);
             }
+
             return nodes;
         }
+
         private static LinearParameters TreeRadiusRegression(IList<Node> nodes, double treeHeight)
         {
             var xv = new List<double>();
@@ -44,14 +49,16 @@ namespace ForestTaxator.Model
                 xv.Add(Math.Log(treeHeight - node.Center.Z));
                 yv.Add(2 * Math.Log(node.Ellipse.MajorRadius));
             }
+
             // y^2 = px^r => 2*ln(y) = r*ln(x) + ln(p)
             // x - height from the TOP
             // y - tree radius
             // r - tree shape exponent
             // p - tree shape parameter
             Regression(xv, yv, out var r, out var lnp);
-            return new LinearParameters { A = r, B = Math.Exp(lnp) };
+            return new LinearParameters {A = r, B = Math.Exp(lnp)};
         }
+
         private static LinearParameters[] RegressNodePositions(Node highestNode, int maxCount)
         {
             var xv = new List<double>();
@@ -82,6 +89,7 @@ namespace ForestTaxator.Model
                 new LinearParameters {A = aY, B = bY},
             };
         }
+
         private static void RegressLevelsFromLastToTop(double treeHeight, Node highest, IList<Node> nodes, double sliceHeight)
         {
             var treeCenterParameters = RegressNodePositions(highest, 15);
@@ -115,6 +123,7 @@ namespace ForestTaxator.Model
                 last = current;
             }
         }
+
         private static void RegressNodesCentersBetween(Node higher, Node lower, double sliceHeight)
         {
             if (higher.Center.Z - lower.Center.Z <= sliceHeight + 0.01)
@@ -126,7 +135,7 @@ namespace ForestTaxator.Model
             var nodes = new List<Node>();
             var t = higher;
             var lowerAlreadyTaken = false;
-            
+
             // Let's take 10 subsequent nodes for regression data
             while (t != null && nodes.Count < 10)
             {
@@ -176,6 +185,7 @@ namespace ForestTaxator.Model
             lower.AddChild(higher);
             higher.Parent = lower;
         }
+
         private static void RegressSectionEllipses(double treeHeight, Node highest, LinearParameters treeRadiusParameters, double sliceHeight)
         {
             var current = highest.Parent;
@@ -213,7 +223,7 @@ namespace ForestTaxator.Model
                     .OrderBy(c => Distance(c.Center, highestChild.Center, Euclidean, EDimension.X, EDimension.Y)).First();
                 index++;
             }
-            
+
             var treeCenterParameters = RegressNodePositions(highestChild, 10);
             var z = sliceHeight * Math.Floor(terrainHeight / sliceHeight);
 
@@ -229,22 +239,24 @@ namespace ForestTaxator.Model
 
             var selected = new Node(set)
             {
-                Center = { X = set[0].X, Y = set[0].Y, Z = set[0].Z }
+                Center = {X = set[0].X, Y = set[0].Y, Z = set[0].Z}
             };
 
             Root = selected;
 
-            while (last.Center.Z - z - sliceHeight > 0.01) 
+            while (last.Center.Z - z - sliceHeight > 0.01)
             {
                 set = new PointSet
                 {
-                    new(treeCenterParameters[0].A * z + treeCenterParameters[0].B, treeCenterParameters[1].A * z + treeCenterParameters[1].B, z)
+                    new(treeCenterParameters[0].A * z + treeCenterParameters[0].B, treeCenterParameters[1].A * z + treeCenterParameters[1].B,
+                        z)
                 };
                 selected.AddChild(set);
                 selected = selected.Children[0];
                 selected.Center = set[0].Clone();
                 z += sliceHeight;
             }
+
             selected.AddChild(last);
             last.Parent = selected;
         }
@@ -272,17 +284,16 @@ namespace ForestTaxator.Model
                 var dist2 = Distance(previousFirstFocal, node.Ellipse.SecondFocal, EuclideanSquare, EDimension.X, EDimension.Y);
                 var dist1LessDist2 = dist1 < dist2;
                 previousFirstFocal = dist1LessDist2 ? node.Ellipse.FirstFocal : node.Ellipse.SecondFocal;
-                firstFocis.Add( dist1LessDist2 ? node.Ellipse.FirstFocal : node.Ellipse.SecondFocal);
-                secondFocis.Add( dist1LessDist2 ? node.Ellipse.SecondFocal : node.Ellipse.FirstFocal);
-
+                firstFocis.Add(dist1LessDist2 ? node.Ellipse.FirstFocal : node.Ellipse.SecondFocal);
+                secondFocis.Add(dist1LessDist2 ? node.Ellipse.SecondFocal : node.Ellipse.FirstFocal);
             }
-            
-            var xp1 = Regression(heights, firstFocis.Select(p=>p.X).ToArray());
+
+            var xp1 = Regression(heights, firstFocis.Select(p => p.X).ToArray());
             var yp1 = Regression(heights, firstFocis.Select(p => p.Y).ToArray());
-            
-            var xp2 = Regression(heights, secondFocis.Select(p=>p.X).ToArray());
+
+            var xp2 = Regression(heights, secondFocis.Select(p => p.X).ToArray());
             var yp2 = Regression(heights, secondFocis.Select(p => p.Y).ToArray());
-            
+
             foreach (var node in nodes)
             {
                 var height = sliceHeight * Math.Floor(node.Center.Z / sliceHeight);
@@ -296,13 +307,13 @@ namespace ForestTaxator.Model
                 }
                 else
                 {
-                    node.Ellipse.SetFirstFocal(EDimension.X, (float)(xp1.A * height + xp1.B));
-                    node.Ellipse.SetFirstFocal(EDimension.Y, (float)(yp1.A * height + yp1.B));
-                    node.Ellipse.SetFirstFocal(EDimension.Z, (float)height);
+                    node.Ellipse.SetFirstFocal(EDimension.X, (float) (xp1.A * height + xp1.B));
+                    node.Ellipse.SetFirstFocal(EDimension.Y, (float) (yp1.A * height + yp1.B));
+                    node.Ellipse.SetFirstFocal(EDimension.Z, (float) height);
 
-                    node.Ellipse.SetSecondFocal(EDimension.X, (float)(xp2.A * height + xp2.B));
-                    node.Ellipse.SetSecondFocal(EDimension.Y, (float)(yp2.A * height + yp2.B));
-                    node.Ellipse.SetSecondFocal(EDimension.Z, (float)height);
+                    node.Ellipse.SetSecondFocal(EDimension.X, (float) (xp2.A * height + xp2.B));
+                    node.Ellipse.SetSecondFocal(EDimension.Y, (float) (yp2.A * height + yp2.B));
+                    node.Ellipse.SetSecondFocal(EDimension.Z, (float) height);
                 }
             }
         }
@@ -386,7 +397,7 @@ namespace ForestTaxator.Model
 
         public Node[] GetAllNodesAsVector(Node node)
         {
-            var nodes = new List<Node> { node };
+            var nodes = new List<Node> {node};
 
             if (node.Children.Count <= 0)
             {
@@ -410,8 +421,8 @@ namespace ForestTaxator.Model
                 return nodes.ToArray();
             }
 
-            if (Root != null 
-                && Root.Children.Count > 0 
+            if (Root != null
+                && Root.Children.Count > 0
                 && Math.Round(Root.Children[0].Center.Z, 1, MidpointRounding.ToEven) == Math.Round(height, 1, MidpointRounding.ToEven)
             )
             {
@@ -425,6 +436,7 @@ namespace ForestTaxator.Model
 
                 return nodes.ToArray();
             }
+
             if (Root != null && Root.Children.Count == 0)
             {
                 nodes.AddLast(Root);
@@ -439,6 +451,7 @@ namespace ForestTaxator.Model
                     nodes.AddLast(t);
                 }
             }
+
             return nodes.ToArray();
         }
 
@@ -450,7 +463,7 @@ namespace ForestTaxator.Model
             };
         }
 
-        public void CreateRoot(PointSet pointSet) => Root = new Node(pointSet) { Tree = this };
+        public void CreateRoot(PointSet pointSet) => Root = new Node(pointSet) {Tree = this};
 
         public void RegressMissingLevels(double terrainHeight, double treeHeight, double sliceHeight)
         {
@@ -460,9 +473,9 @@ namespace ForestTaxator.Model
             var treeRadiusParameters = TreeRadiusRegression(nodes, treeHeight);
 
             RegressSectionsFromGroundToFirst(terrainHeight, sliceHeight);
-            
-            // RegressSectionsFromFirstToLast(sliceHeight);
-            
+
+            RegressSectionsFromFirstToLast(sliceHeight);
+
             RegressSectionEllipses(treeHeight, highest, treeRadiusParameters, sliceHeight);
 
             if (treeHeight - highest.Center.Z > sliceHeight + 0.01)
@@ -470,7 +483,7 @@ namespace ForestTaxator.Model
                 RegressLevelsFromLastToTop(treeHeight, highest, nodes, sliceHeight);
             }
 
-          //  SmoothEntireTree(treeHeight, treeRadiusParameters, sliceHeight);
+            // SmoothEntireTree(treeHeight, treeRadiusParameters, sliceHeight);
         }
 
         public void SetRoot(Node node)
@@ -497,7 +510,7 @@ namespace ForestTaxator.Model
 
             public void AddChild(PointSet pointSet)
             {
-                Children.Add(new Node(pointSet) { Tree = Tree });
+                Children.Add(new Node(pointSet) {Tree = Tree});
                 Children[^1].Parent = this;
             }
 
@@ -534,7 +547,7 @@ namespace ForestTaxator.Model
                 for (var i = 0; i < pointsCount; i++)
                 {
                     var distance = Distance(PointSet[i], Ellipse.FirstFocal, Euclidean, EDimension.X, EDimension.Y) +
-                                    Distance(PointSet[i], Ellipse.SecondFocal, Euclidean, EDimension.X, EDimension.Y);
+                                   Distance(PointSet[i], Ellipse.SecondFocal, Euclidean, EDimension.X, EDimension.Y);
 
                     var difference = distance - 2 * Ellipse.MajorRadius;
 
@@ -611,5 +624,4 @@ namespace ForestTaxator.Model
             }
         }
     }
-
 }

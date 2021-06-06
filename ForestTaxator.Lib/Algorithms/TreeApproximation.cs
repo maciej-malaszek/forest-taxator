@@ -28,7 +28,7 @@ namespace ForestTaxator.Algorithms
 
             var terrainHeight = terrain.GetHeight(tree.Root.Center);
             
-            tree.RegressMissingLevels(terrainHeight, treeHeight ?? tree.GetHighestNode().Center.Z, sliceHeight);
+            //tree.RegressMissingLevels(terrainHeight, treeHeight ?? tree.GetHighestNode().Center.Z, sliceHeight);
             //
             // nodes = tree.GetAllNodesAsVector();
             // foreach (var node in nodes)
@@ -59,7 +59,6 @@ namespace ForestTaxator.Algorithms
                 ellipse.SecondFocal.X += node.PointSet.Center.X;
                 ellipse.FirstFocal.Y += node.PointSet.Center.Y;
                 ellipse.SecondFocal.Y += node.PointSet.Center.Y;
-                node.Ellipse = ellipse;
 
                 if (ellipse.Eccentricity < _eccentricityThreshold && fitness < _fitnessThreshold)
                 {

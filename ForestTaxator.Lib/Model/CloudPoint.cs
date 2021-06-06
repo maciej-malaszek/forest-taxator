@@ -17,7 +17,7 @@ namespace ForestTaxator.Model
             Z = z;
         }
 
-        public override byte[] Serialize()
+        public override byte[] BinarySerialized()
         {
             var data = new byte[32];
             Array.Copy(BitConverter.GetBytes(X),data,8);
@@ -25,6 +25,11 @@ namespace ForestTaxator.Model
             Array.Copy(BitConverter.GetBytes(Z),0, data,16, 8);
             Array.Copy(BitConverter.GetBytes(Intensity),0, data,24, 8);
             return data;
+        }
+
+        public override string StringSerialized()
+        {
+            return $"{X:0.########} {Y:0.########} {Z:0.########} {Intensity:0.########}";
         }
 
         public void DetachFromSet()

@@ -33,6 +33,7 @@ namespace ForestTaxator.Algorithms
             }
 
             double fitness = 0;
+            var counter = 0;
 
             var offsetFoci1 = x.F1 + _analyzedPointSet.Center;
             var offsetFoci2 = x.F2 + _analyzedPointSet.Center;
@@ -53,16 +54,18 @@ namespace ForestTaxator.Algorithms
                 var absoluteDistance = Math.Abs(dist); 
                 if (absoluteDistance > BufferWidth)
                 {
-                    fitness += absoluteDistance / _analyzedPointSet.Count;
+                    fitness += absoluteDistance;
+                    counter++;
                 }
             }
+            fitness /= counter;
            
             return fitness;
         }
         
         
 
-        public virtual IIndividual FindBestIndividual(PointSet @group, Ellipsis initializer = null)
+        public virtual IIndividual FindBestIndividual(PointSet group, Ellipsis initializer = null)
         {
             if (group == null || group.Center.Z < 0.1)
             {
@@ -88,16 +91,13 @@ namespace ForestTaxator.Algorithms
             GeneticAlgorithm.Population.Initialize(() =>
             {
                 const float OffsetDeviationInMeters = 0.05f;
-                const float RadiusDeviationInMeters = 0.05f;
+                const float RadiusDeviationInMeters = 0.25f;
                 
                 var random = new Random();
                 var individuals = new IIndividual[GeneticAlgorithm.Population.Size];
                 
                 var offsetStepSize = OffsetDeviationInMeters / GeneticAlgorithm.Population.Size;
                 var halfOffsetDeviationInMeters = OffsetDeviationInMeters / 2;
-
-                var radiusDeviationStep = RadiusDeviationInMeters / GeneticAlgorithm.Population.Size;
-                var halfRadiusDeviation = RadiusDeviationInMeters / 2;
 
                 var defaultRadius = (float) (0.5f * Math.Min(_analyzedPointSet.BoundingBox.Width, _analyzedPointSet.BoundingBox.Depth));
                 
@@ -113,7 +113,7 @@ namespace ForestTaxator.Algorithms
                             X2 = x2,
                             Y1 = y1,
                             Y2 = y2,
-                            A = (float) (initializer?.MajorRadius ?? defaultRadius + radiusDeviationStep * i - halfRadiusDeviation)
+                            A = (float) (initializer?.MajorRadius ?? defaultRadius + random.NextDouble()*RadiusDeviationInMeters)
                         }
                     );
                     individuals[i] = GeneticAlgorithm.Population.IndividualFactory.CreateFromGenotype(genotype);
