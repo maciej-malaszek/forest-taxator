@@ -15,6 +15,7 @@ using ForestTaxator.Filters;
 using ForestTaxator.Model;
 using ForestTaxator.TestApp.Commands;
 using ForestTaxator.TestApp.Commands.Analyze;
+using ForestTaxator.TestApp.Commands.Extensions;
 using ForestTaxator.Utils;
 using GeneticToolkit;
 using GeneticToolkit.Comparisons;
@@ -53,11 +54,11 @@ namespace ForestTaxator.TestApp
             var parsed = Parser.Default.ParseSetArguments<AnalyzeVerbSet, ConvertVerb>(args, OnVerbSetParsed);
             parsed.MapResult<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand, Task>
             (
-                _ => Task.CompletedTask,
-                _ => Task.CompletedTask,
-                _ => Task.CompletedTask,
-                _ => Task.CompletedTask,
-                _ => Task.CompletedTask,
+                approximateCommand => Parser.Default.ExecuteMapping(approximateCommand, _ => Task.CompletedTask),
+                detectTreesCommand => Parser.Default.ExecuteMapping(detectTreesCommand, _ => Task.CompletedTask),
+                filterCommand => Parser.Default.ExecuteMapping(filterCommand, _ => Task.CompletedTask),
+                sliceCommand => Parser.Default.ExecuteMapping(sliceCommand, _ => Task.CompletedTask),
+                terrainCommand => Parser.Default.ExecuteMapping(terrainCommand, _ => Task.CompletedTask),
                 _ => Task.CompletedTask
             );
             _consoleProgressBar.Dispose();
