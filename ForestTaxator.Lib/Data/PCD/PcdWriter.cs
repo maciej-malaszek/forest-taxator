@@ -5,6 +5,10 @@ namespace ForestTaxator.Data.PCD
 {
     public class PcdWriter : ICloudStreamWriter, IDisposable
     {
+        public PcdWriter(string path)
+        {
+            
+        }
         public void WritePoint(CloudPoint point)
         {
             throw new NotImplementedException();

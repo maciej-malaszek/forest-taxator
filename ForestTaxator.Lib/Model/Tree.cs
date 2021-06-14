@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ForestTaxator.Algorithms;
-using ForestTaxator.Utils;
 using static ForestTaxator.Utils.MathUtils;
 using static ForestTaxator.Utils.MathUtils.EDistanceMetric;
 

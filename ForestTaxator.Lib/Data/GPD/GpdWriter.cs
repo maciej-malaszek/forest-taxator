@@ -2,19 +2,19 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using ForestTaxator.Model;
 
 namespace ForestTaxator.Data.GPD
 {
-    public class GpdWriter : IDisposable
+    public class GpdWriter : ICloudStreamWriter, IDisposable
     {
         private readonly FileInfo _fileInfo;
         private readonly StreamWriter _streamWriter;
         private readonly BinaryWriter _binaryWriter;
         private readonly bool _binaryMode;
         private int _groupId;
-        
+        public int SliceId { get; set; }
+
         public GpdWriter(string filePath, bool binaryMode = true)
         {
             _binaryMode = binaryMode;
@@ -31,6 +31,7 @@ namespace ForestTaxator.Data.GPD
                 {
                     _streamWriter = new StreamWriter(bufferedStream, Encoding.ASCII);
                 }
+
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             }
             catch (Exception exception)
@@ -38,7 +39,8 @@ namespace ForestTaxator.Data.GPD
                 Console.WriteLine(exception);
             }
         }
-        private async Task WriteLine(string data)
+
+        private void WriteLine(string data)
         {
             if (_binaryMode)
             {
@@ -46,47 +48,12 @@ namespace ForestTaxator.Data.GPD
                 return;
             }
 
-            await _streamWriter.WriteLineAsync(data);
+            _streamWriter.WriteLine(data);
         }
 
-        private async Task WritePoint<T>(T point) where T : Point
+        public void WriteGroupMeta(GpdGroupMeta metadata)
         {
-            if (_binaryMode)
-            {
-                var data = point.BinarySerialized();
-                _binaryWriter.Write(data);
-                return;
-            }
-
-            await _streamWriter.WriteLineAsync(point.StringSerialized());
-        }
-
-        public async Task WriteGroupMeta(GpdGroupMeta metadata)
-        {
-            await WriteLine(metadata.ToString());
-        }
-
-        public async Task WritePointSet(PointSet pointSet, int sliceId = 0)
-        {
-            var groupMeta = new GpdGroupMeta
-            {
-                Points = pointSet.Count,
-                Slice = sliceId,
-                Id = _groupId++
-            };
-            await WriteGroupMeta(groupMeta);
-            foreach (var point in pointSet)
-            {
-                await WritePoint(point);
-            }
-        }
-
-        public async Task WritePointSetGroup(PointSetGroup pointSetGroup, int sliceId = 0)
-        {
-            foreach (var pointSet in pointSetGroup.PointSets)
-            {
-                await WritePointSet(pointSet, sliceId);
-            }
+            WriteLine(metadata.ToString());
         }
 
         public void Dispose()
@@ -95,6 +62,63 @@ namespace ForestTaxator.Data.GPD
             _streamWriter?.Dispose();
             _binaryWriter?.Flush();
             _binaryWriter?.Dispose();
+        }
+
+        public void WritePoint(CloudPoint point)
+        {
+            if (_binaryMode)
+            {
+                var data = point.BinarySerialized();
+                _binaryWriter.Write(data);
+                return;
+            }
+
+            _streamWriter.WriteLine(point.StringSerialized());
+        }
+
+        public void WritePoint(Point point)
+        {
+            if (_binaryMode)
+            {
+                var data = point.BinarySerialized();
+                _binaryWriter.Write(data);
+                return;
+            }
+
+            _streamWriter.WriteLine(point.StringSerialized());
+        }
+
+        public void WritePointSet(PointSet pointSet)
+        {
+            WritePointSet(pointSet, SliceId);
+        }
+
+        public void WritePointSet(PointSet pointSet, int sliceId)
+        {
+            var groupMeta = new GpdGroupMeta
+            {
+                Points = pointSet.Count,
+                Slice = sliceId,
+                Id = _groupId++
+            };
+            WriteGroupMeta(groupMeta);
+            foreach (var point in pointSet)
+            {
+                WritePoint(point);
+            }
+        }
+
+        public void WritePointSetGroup(PointSetGroup pointSetGroup, int sliceId)
+        {
+            foreach (var pointSet in pointSetGroup.PointSets)
+            {
+                WritePointSet(pointSet, sliceId);
+            }
+        }
+        
+        public void WritePointSetGroup(PointSetGroup pointSetGroup)
+        {
+            WritePointSetGroup(pointSetGroup, SliceId);
         }
     }
 }

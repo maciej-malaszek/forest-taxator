@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ForestTaxator.Data.Compression;
@@ -21,13 +22,13 @@ namespace ForestTaxator.Data.PCD
         private CloudPoint ReadAsciiPoint()
         {
             var p = new CloudPoint();
-            var fields = _streamReader.ReadLine()?.Split(" ");
+            var line = _streamReader.ReadLine();
+            var fields = line?.Split(" "); 
             if (fields == null)
             {
                 return null;
             }
-
-
+            
             for (var i = 0; i < fields.Length; i++)
             {
                 p[i] = (Header.Type[i], Header.Size[i]) switch
@@ -82,8 +83,7 @@ namespace ForestTaxator.Data.PCD
 
             return p;
         }
-
-
+        
         private CloudPoint ReadBinaryPointFromOrdered()
         {
             var p = new CloudPoint();
@@ -157,6 +157,11 @@ namespace ForestTaxator.Data.PCD
             return new PointSet(points);
         }
 
+        public IEnumerable<PointSlice> ReadPointSlices(float sliceHeight = 0.1f)
+        {
+            return ReadCloud().Slice(sliceHeight);
+        }
+
         public Cloud ReadCloud()
         {
             return new(ReadPointSet());
@@ -177,32 +182,42 @@ namespace ForestTaxator.Data.PCD
         {
             _fileInfo = new FileInfo(path);
             var fileStream = File.Open(path, FileMode.Open);
-            var bufferedStream = new BufferedStream(fileStream, 4096);
-            _streamReader = new StreamReader(bufferedStream);
+            var bufferedStream = new BufferedStream(fileStream, 4096); 
+            _streamReader = new StreamReader(fileStream);
             Header = new PcdHeader(_streamReader);
-
-            if (Header.DataType == PcdHeader.EDataType.BINARY)
+            
+            switch (Header.DataType)
             {
-                _binaryReader = new BinaryReader(bufferedStream);
-                _binaryReader.ReadBytes(Header.HeaderBytes);
-            }
-
-            if (Header.DataType == PcdHeader.EDataType.BINARY_COMPRESSED)
-            {
-                _pointIndex = 0;
-                using var binaryReader = new BinaryReader(bufferedStream);
-                var headerBytes = binaryReader.ReadBytes(Header.HeaderBytes);
-                var compressedDataBytes = binaryReader.ReadUInt32();
-                var uncompressedDataBytes = binaryReader.ReadUInt32();
-                if (Header.HeaderBytes + compressedDataBytes + 8 != bufferedStream.Length)
+                case PcdHeader.EDataType.ASCII:
                 {
-                    // Add some validation log here
+                    _streamReader.BaseStream.Seek(Header.HeaderBytes, SeekOrigin.Begin);
+                    _streamReader.DiscardBufferedData();
+                    break;
                 }
+                case PcdHeader.EDataType.BINARY:
+                {
+                    _binaryReader = new BinaryReader(bufferedStream);
+                    _binaryReader.ReadBytes(Header.HeaderBytes);
+                    break;
+                }
+                case PcdHeader.EDataType.BINARY_COMPRESSED:
+                {
+                    _pointIndex = 0;
+                    using var binaryReader = new BinaryReader(bufferedStream);
+                    var headerBytes = binaryReader.ReadBytes(Header.HeaderBytes);
+                    var compressedDataBytes = binaryReader.ReadUInt32();
+                    var uncompressedDataBytes = binaryReader.ReadUInt32();
+                    if (Header.HeaderBytes + compressedDataBytes + 8 != bufferedStream.Length)
+                    {
+                        // Add some validation log here
+                    }
 
-                var fileContent = binaryReader.ReadBytes((int) compressedDataBytes);
-                var decompressed = CLZF2.Decompress(fileContent);
-                var memoryStream = new MemoryStream(decompressed);
-                _binaryReader = new BinaryReader(memoryStream);
+                    var fileContent = binaryReader.ReadBytes((int) compressedDataBytes);
+                    var decompressed = CLZF2.Decompress(fileContent);
+                    var memoryStream = new MemoryStream(decompressed);
+                    _binaryReader = new BinaryReader(memoryStream);
+                    break;
+                }
             }
         }
     }

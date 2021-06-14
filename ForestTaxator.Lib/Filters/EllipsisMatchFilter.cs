@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using ForestTaxator.Algorithms;
 using ForestTaxator.Model;
-using ForestTaxator.Utils;
 using GeneticToolkit.Phenotypes.Collective;
 
 

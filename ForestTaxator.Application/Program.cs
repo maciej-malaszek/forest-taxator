@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
@@ -16,6 +17,7 @@ using ForestTaxator.Model;
 using ForestTaxator.TestApp.Commands;
 using ForestTaxator.TestApp.Commands.Analyze;
 using ForestTaxator.TestApp.Commands.Extensions;
+using ForestTaxator.TestApp.Flows;
 using ForestTaxator.Utils;
 using GeneticToolkit;
 using GeneticToolkit.Comparisons;
@@ -34,15 +36,20 @@ using GeneticToolkit.Selections;
 using GeneticToolkit.Utils;
 using GeneticToolkit.Utils.Factories;
 using ProgressHierarchy;
+using Serilog;
 
 namespace ForestTaxator.TestApp
 {
     class Program
     {
         private static HierarchicalProgress _consoleProgressBar;
+        private static ILogger _logger;
 
         static void Main(string[] args)
         {
+            _logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
             using var progressBar = new ProgressBar
             {
                 BarCharacter = '\u2588',
@@ -52,13 +59,14 @@ namespace ForestTaxator.TestApp
             _consoleProgressBar = progressBar.HierarchicalProgress.Fork(1);
 
             var parsed = Parser.Default.ParseSetArguments<AnalyzeVerbSet, ConvertVerb>(args, OnVerbSetParsed);
-            parsed.MapResult<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand, Task>
+            parsed.MapResult<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand, ConvertVerb, Task>
             (
                 approximateCommand => Parser.Default.ExecuteMapping(approximateCommand, _ => Task.CompletedTask),
                 detectTreesCommand => Parser.Default.ExecuteMapping(detectTreesCommand, _ => Task.CompletedTask),
                 filterCommand => Parser.Default.ExecuteMapping(filterCommand, _ => Task.CompletedTask),
                 sliceCommand => Parser.Default.ExecuteMapping(sliceCommand, _ => Task.CompletedTask),
-                terrainCommand => Parser.Default.ExecuteMapping(terrainCommand, _ => Task.CompletedTask),
+                terrainCommand => Parser.Default.ExecuteMapping(terrainCommand, cmd => TerrainFlow.Execute(cmd, _logger)),
+                convertCommand => Parser.Default.ExecuteMapping(convertCommand, cmd => ConversionFlow.Execute(cmd, _logger)),
                 _ => Task.CompletedTask
             );
             _consoleProgressBar.Dispose();
@@ -68,8 +76,7 @@ namespace ForestTaxator.TestApp
             Parsed<object> parsed, IEnumerable<string> argsToParse, bool containedHelpOrVersion)
         {
             return parsed.MapResult(
-                (AnalyzeVerbSet _) => parser
-                    .ParseArguments<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand>(argsToParse),
+                (AnalyzeVerbSet _) => parser.ParseArguments<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand>(argsToParse),
                 _ => parsed);
         }
 
@@ -248,28 +255,7 @@ namespace ForestTaxator.TestApp
             geneticDistributionFilter.GeneticAlgorithm = geneticAlgorithm;
             return geneticDistributionFilter;
         }
-
-        private static Task ConvertFile(ConvertVerb convertVerb)
-        {
-            ICloudStreamReader reader = convertVerb.InputFormat.ToLowerInvariant() switch
-            {
-                "pcd" => new PcdReader(convertVerb.InputFile),
-                "xyz" => new XyzReader(convertVerb.InputFile, Encoding.ASCII),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-            var baseOutput = string.Join(".", convertVerb.InputFile.Split(".").SkipLast(1));
-            ICloudStreamWriter writer = convertVerb.OutputFormat.ToLowerInvariant() switch
-            {
-                "xyz" => new XyzWriter($"{baseOutput}.xyz"),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-            writer.WritePointSet(reader.ReadPointSet());
-            return Task.CompletedTask;
-        }
-
-
+        
         private static void Report(string status, double step, double total)
         {
             _consoleProgressBar.Report(step / total, status);

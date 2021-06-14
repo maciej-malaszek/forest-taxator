@@ -16,8 +16,8 @@ namespace ForestTaxator.TestApp.Commands.Analyze
         [Option('o', "output", Required = true)]
         public string Output { get; set; }
         
-        [Option('t', "terrain", Default = 2.5)]
-        public float Resolution { get; set; }
+        [Option('r', "resolution", Default = 2.5)]
+        public double Resolution { get; set; }
         
         [Option('m', "method", Default = EMethod.Average, HelpText = "Terrain detection method (Lowest, Average)")]
         public EMethod Method { get; set; }

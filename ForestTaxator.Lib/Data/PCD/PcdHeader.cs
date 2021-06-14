@@ -73,7 +73,7 @@ namespace ForestTaxator.Data.PCD
             Points = Convert.ToUInt64(headerFields["POINTS"][0]);
             Type = headerFields["TYPE"].Select(EnumParse<EType>).ToArray();
             DataType = EnumParse<EDataType>(headerFields["DATA"][0].ToUpper());
-
+            
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
         }
 

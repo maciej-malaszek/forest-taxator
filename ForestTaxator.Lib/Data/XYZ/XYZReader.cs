@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -58,6 +59,11 @@ namespace ForestTaxator.Data.XYZ
             } while (p != null);
 
             return pointSet;
+        }
+
+        public IEnumerable<PointSlice> ReadPointSlices(float sliceHeight)
+        {
+            return ReadCloud().Slice(sliceHeight);
         }
 
         public Cloud ReadCloud()
