@@ -9,7 +9,7 @@ namespace ForestTaxator.Model
 
         private readonly Dictionary<Tuple<int, int>, double> _heightMap;
 
-        public Terrain(PointSet cloud, double meshSize = 2.5)
+        public Terrain(PointSet cloud, double meshSize = 2.5, double maxTerrainHeight = 1)
         {
             MeshSize = meshSize;
             _heightMap = new Dictionary<Tuple<int, int>, double>();
@@ -17,7 +17,10 @@ namespace ForestTaxator.Model
             foreach (var cloudPoint in cloud)
             {
                 var key = GetKey(cloudPoint);
-                
+                if (cloudPoint.Z > maxTerrainHeight)
+                {
+                    continue;
+                }
                 if (!_heightMap.ContainsKey(key) || _heightMap[key] > cloudPoint.Z)
                 {
                     _heightMap[key] = cloudPoint.Z;

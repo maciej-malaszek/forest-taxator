@@ -2,22 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using ForestTaxator.Model;
 
 namespace ForestTaxator.Data.GPD
 {
-    public class GpdReader : ICloudStreamReader, IDisposable
+    public class GpdReader : ICloudStreamReader
     {
-        private readonly StreamReader _streamReader;
         private readonly BinaryReader _binaryReader;
         private readonly FileInfo _fileInfo;
         private readonly FileStream _fileStream;
         public long Size => _fileInfo.Length;
 
-        private int pointId = 0;
-        private int pointGroupId = 0;
-        private int sliceId = 0;
-        private long pointsInCurrentGroup = 0;
+        private int _pointId = 0;
+        private int _pointGroupId = 0;
+        private int _sliceId = 0;
+        private long _pointsInCurrentGroup = 0;
+        private const byte MetaDataChar = 0x23;
 
         public GpdHeader Header { get; }
 
@@ -32,26 +33,38 @@ namespace ForestTaxator.Data.GPD
         {
             _fileInfo = new FileInfo(inputFile);
             _fileStream = File.Open(inputFile, FileMode.Open);
-            _binaryReader = new BinaryReader(_fileStream);
-            _streamReader = new StreamReader(_fileStream);
-            Header = new GpdHeader(_streamReader);
+            var bufferedStream = new BufferedStream(_fileStream);
+            _binaryReader = new BinaryReader(bufferedStream);
+            Header = new GpdHeader(_fileStream);
             _fileStream.Seek(Header.HeaderBytes, SeekOrigin.Begin);
         }
 
         public GpdGroupMeta ReadMetaData()
         {
-            var metadataLine = _streamReader.ReadLine();
+            var stringBuilder = new StringBuilder();
+            // Meta is ASCII encoded string, so we can read it as chars
+            byte metaDataTagRead = 0;
+            do
+            {
+                var readChar = _binaryReader.ReadChar();
+                if (readChar == MetaDataChar)
+                {
+                    metaDataTagRead++;
+                }
+                stringBuilder.Append(readChar);
+            } while (metaDataTagRead != 2);
+            var metadataLine = stringBuilder.ToString();
             var metaData = GpdGroupMeta.Parse(metadataLine);
-            sliceId = metaData.Slice;
-            pointId = 0;
-            pointGroupId = metaData.Id;
-            pointsInCurrentGroup = metaData.Points;
+            _sliceId = metaData.Slice;
+            _pointId = 0;
+            _pointGroupId = metaData.Id;
+            _pointsInCurrentGroup = metaData.Points;
             return metaData;
         }
 
         public CloudPoint ReadPoint()
         {
-            if (pointId >= pointsInCurrentGroup)
+            if (_pointId >= _pointsInCurrentGroup)
             {
                 return null;
             }
@@ -83,25 +96,25 @@ namespace ForestTaxator.Data.GPD
                 };
             }
 
-            pointId++;
+            _pointId++;
             return p;
         }
 
         public PointSet ReadPointSet()
         {
-            if (pointGroupId >= Header.Groups)
+            if (_pointGroupId >= Header.Groups)
             {
                 return null;
             }
 
             var metaData = ReadMetaData();
-            var pointSet = new PointSet();
-            while (pointId < metaData.Points)
+            var pointSet = new PointSet((int) metaData.Points);
+            while (_pointId < metaData.Points)
             {
                 pointSet.Points.Add(ReadPoint());
             }
 
-            pointGroupId++;
+            _pointGroupId++;
 
             return pointSet;
         }
@@ -113,13 +126,13 @@ namespace ForestTaxator.Data.GPD
             do
             {
                 pointSet = ReadPointSet();
-                pointSlices[sliceId] ??= new PointSlice
+                pointSlices[_sliceId] ??= new PointSlice
                 {
                     PointSets = new List<PointSet>()
                 };
                 if (pointSet != null)
                 {
-                    pointSlices[sliceId].PointSets.Add(pointSet);
+                    pointSlices[_sliceId].PointSets.Add(pointSet);
                 }
             } while (pointSet != null);
 
@@ -138,6 +151,7 @@ namespace ForestTaxator.Data.GPD
                     cloud.Points.AddRange(pointSet.Points);
                 }
             }
+
             return cloud;
         }
 
@@ -145,7 +159,6 @@ namespace ForestTaxator.Data.GPD
         {
             _fileStream?.Dispose();
             _binaryReader?.Dispose();
-            _streamReader?.Dispose();
         }
     }
 }

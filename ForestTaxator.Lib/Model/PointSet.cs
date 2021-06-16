@@ -60,6 +60,13 @@ namespace ForestTaxator.Model
             BoundingBoxDeprecated = true;
             CenterPoint = new Point();
         }
+        
+        public PointSet(int size)
+        {
+            BoundingBoxDeprecated = true;
+            CenterPoint = new Point();
+            Points = new List<CloudPoint>(size);
+        }
 
         public PointSet(IList<CloudPoint> points)
         {
@@ -76,7 +83,17 @@ namespace ForestTaxator.Model
             P2 = BoundingBox.P2;
         }
 
-        public CloudPoint this[long indexer] => indexer < Count ? Points[(int) indexer] : null;
+        public CloudPoint this[long indexer]
+        {
+            get => indexer < Count ? Points[(int) indexer] : null;
+            set
+            {
+                if (indexer < Points.Count)
+                {
+                    Points[(int) indexer] = value;
+                }
+            }
+        }
 
         public void SetBoundingBox(Point center)
         {

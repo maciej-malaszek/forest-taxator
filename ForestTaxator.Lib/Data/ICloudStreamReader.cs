@@ -1,10 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using ForestTaxator.Model;
 
 namespace ForestTaxator.Data
 {
-    public interface ICloudStreamReader
+    public interface ICloudStreamReader : IDisposable
     {
         CloudPoint ReadPoint();
         PointSet ReadPointSet();

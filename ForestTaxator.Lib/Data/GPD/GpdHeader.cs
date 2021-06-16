@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
+using ForestTaxator.Model;
 
 namespace ForestTaxator.Data.GPD
 {
     public class GpdHeader
     {
         #region Enums
-        
+
         public enum EFormat
         {
             GPD,
@@ -50,28 +53,73 @@ namespace ForestTaxator.Data.GPD
 
         public EFormat Format { get; set; }
         public EVersion Version { get; set; }
-        public int Groups { get; set; }
+        public uint Groups { get; set; }
         public float Slice { get; set; }
         public string[] Fields { get; set; }
         public ESize[] Size { get; set; }
         public EType[] Type { get; set; }
-        public int Points { get; set; }
+        public uint Points { get; set; }
         public EDataType DataType { get; set; }
-        public int HeaderBytes { get; private set; }
+        public long HeaderBytes { get; private set; }
 
-        public GpdHeader(StreamReader reader)
+        public GpdHeader()
         {
-            var headerFields = ReadHeader(reader);
+        }
+
+        public GpdHeader(Stream reader)
+        {
+            // We cannot use dispose those, because it will close file and it is too soon to do that
+            var textReader = new StreamReader(reader);
+            var binaryReader = new BinaryReader(reader);
+            
+            var headerFields = ReadHeader(textReader);
             Format = ParseFormat(headerFields["FORMAT"][0]);
             Version = ParseVersion(headerFields["VERSION"][0]);
-            Groups = Convert.ToInt32(headerFields["GROUPS"]);
-            Slice = Convert.ToSingle(headerFields["SLICE"]);
+
+            Slice = Convert.ToSingle(headerFields["SLICE"][0]);
             Fields = headerFields["FIELDS"];
             Size = ParseSize(headerFields["SIZE"]);
             Type = headerFields["TYPE"].Select(EnumParse<EType>).ToArray();
-            Points = Convert.ToInt32(headerFields["POINTS"][0]);
             DataType = EnumParse<EDataType>(headerFields["DATA"][0].ToUpper());
-            reader.BaseStream.Seek(0, SeekOrigin.Begin);
+
+            reader.Seek(HeaderBytes, SeekOrigin.Begin);
+            reader.Seek("GROUPS".Length, SeekOrigin.Current);
+            Groups = binaryReader.ReadUInt32();
+            reader.Seek("POINTS".Length, SeekOrigin.Current);
+            Points = binaryReader.ReadUInt32();
+            HeaderBytes = reader.Position;
+
+            reader.Seek(0, SeekOrigin.Begin);
+        }
+
+        public byte[] BinarySerialize()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine($"FORMAT {Format.ToString().ToUpperInvariant()}");
+            stringBuilder.AppendLine($"VERSION {Version.ToString().ToUpperInvariant()}");
+            stringBuilder.AppendLine($"SLICE {Slice.ToString(CultureInfo.InvariantCulture).ToUpperInvariant()}");
+            stringBuilder.AppendLine($"FIELDS {string.Join(' ', Fields.Select(x => x.ToString().ToUpperInvariant()))}");
+            stringBuilder.AppendLine($"SIZE {string.Join(' ', Size.Select(x => (int) x))}");
+            stringBuilder.AppendLine($"TYPE {string.Join(' ', Type.Select(x => x.ToString().ToUpperInvariant()))}");
+            stringBuilder.AppendLine($"DATA {DataType.ToString().ToUpperInvariant()}");
+            var asciiHeader = Encoding.ASCII.GetBytes(stringBuilder.ToString());
+            var groupsHeader = Encoding.ASCII.GetBytes("GROUPS");
+            var pointsHeader = Encoding.ASCII.GetBytes("POINTS");
+
+            var headerSize = asciiHeader.Length + groupsHeader.Length + pointsHeader.Length + sizeof(uint) + sizeof(uint);
+            var header = new byte[headerSize];
+            var offset = 0;
+            Buffer.BlockCopy(asciiHeader, 0, header, offset, asciiHeader.Length);
+            offset += asciiHeader.Length;
+            Buffer.BlockCopy(groupsHeader, 0, header, offset, groupsHeader.Length);
+            offset += groupsHeader.Length;
+            Buffer.BlockCopy(BitConverter.GetBytes(Groups), 0, header, offset, sizeof(uint));
+            offset += sizeof(uint);
+            Buffer.BlockCopy(pointsHeader, 0, header, offset, pointsHeader.Length);
+            offset += pointsHeader.Length;
+            Buffer.BlockCopy(BitConverter.GetBytes(Points), 0, header, offset, sizeof(uint));
+
+            return header;
         }
 
         private static EFormat ParseFormat(string s)
@@ -138,6 +186,5 @@ namespace ForestTaxator.Data.GPD
 
             return header;
         }
-
     }
 }

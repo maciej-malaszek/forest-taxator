@@ -7,7 +7,7 @@ using ForestTaxator.Model;
 
 namespace ForestTaxator.Data.PCD
 {
-    public class PcdReader : ICloudStreamReader, IDisposable
+    public class PcdReader : ICloudStreamReader
     {
         private readonly StreamReader _streamReader;
         private readonly BinaryReader _binaryReader;

@@ -5,7 +5,7 @@ namespace ForestTaxator.Model
     [Serializable]
     public class CloudPoint : Point
     {
-        public float Intensity { get; set; }
+        public double Intensity { get; set; }
         public PointSet OwningSet { get; private set; }
 
         public CloudPoint() {  }
@@ -20,10 +20,10 @@ namespace ForestTaxator.Model
         public override byte[] BinarySerialized()
         {
             var data = new byte[32];
-            Array.Copy(BitConverter.GetBytes(X),data,8);
-            Array.Copy(BitConverter.GetBytes(Y),0, data,8, 8);
-            Array.Copy(BitConverter.GetBytes(Z),0, data,16, 8);
-            Array.Copy(BitConverter.GetBytes(Intensity),0, data,24, 8);
+            Array.Copy(BitConverter.GetBytes(X),data,sizeof(double));
+            Array.Copy(BitConverter.GetBytes(Y),0, data,sizeof(double), sizeof(double));
+            Array.Copy(BitConverter.GetBytes(Z),0, data,2*sizeof(double), sizeof(double));
+            Array.Copy(BitConverter.GetBytes(Intensity),0, data,3*sizeof(double), sizeof(double));
             return data;
         }
 

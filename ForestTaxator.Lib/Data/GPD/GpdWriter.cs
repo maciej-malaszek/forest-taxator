@@ -6,32 +6,32 @@ using ForestTaxator.Model;
 
 namespace ForestTaxator.Data.GPD
 {
-    public class GpdWriter : ICloudStreamWriter, IDisposable
+    public class GpdWriter : ICloudStreamWriter
     {
-        private readonly FileInfo _fileInfo;
-        private readonly StreamWriter _streamWriter;
+        private readonly GpdHeader _header;
         private readonly BinaryWriter _binaryWriter;
-        private readonly bool _binaryMode;
         private int _groupId;
+        private uint _pointCounter;
         public int SliceId { get; set; }
 
-        public GpdWriter(string filePath, bool binaryMode = true)
+        public GpdWriter(string filePath, string[] fields, float sliceHeight)
         {
-            _binaryMode = binaryMode;
+            _header = new GpdHeader
+            {
+                Version = GpdHeader.EVersion.V1,
+                Slice = sliceHeight,
+                Fields = fields ?? new[] {"x", "y", "z", "intensity"},
+                Format = GpdHeader.EFormat.GPD,
+                Size = new[] {GpdHeader.ESize.Double, GpdHeader.ESize.Double, GpdHeader.ESize.Double, GpdHeader.ESize.Double},
+                Type = new[] {GpdHeader.EType.F, GpdHeader.EType.F, GpdHeader.EType.F, GpdHeader.EType.F},
+                DataType = GpdHeader.EDataType.BINARY
+            };
             try
             {
-                _fileInfo = new FileInfo(filePath);
                 var fileStream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                 var bufferedStream = new BufferedStream(fileStream, 4096);
-                if (_binaryMode)
-                {
-                    _binaryWriter = new BinaryWriter(bufferedStream);
-                }
-                else
-                {
-                    _streamWriter = new StreamWriter(bufferedStream, Encoding.ASCII);
-                }
-
+                _binaryWriter = new BinaryWriter(bufferedStream);
+                PrependMetadataHeader();
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             }
             catch (Exception exception)
@@ -42,13 +42,18 @@ namespace ForestTaxator.Data.GPD
 
         private void WriteLine(string data)
         {
-            if (_binaryMode)
-            {
-                _binaryWriter.Write(data);
-                return;
-            }
+            _binaryWriter.Write(Encoding.ASCII.GetBytes(data));
+        }
 
-            _streamWriter.WriteLine(data);
+        public void PrependMetadataHeader()
+        {
+            _binaryWriter.Flush();
+            _header.Points = _pointCounter;
+            _header.Groups = (uint) _groupId;
+            var header = _header.BinarySerialize();
+            _binaryWriter.Seek(0, SeekOrigin.Begin);
+            _binaryWriter.Write(header);
+            _binaryWriter.Flush();
         }
 
         public void WriteGroupMeta(GpdGroupMeta metadata)
@@ -58,34 +63,23 @@ namespace ForestTaxator.Data.GPD
 
         public void Dispose()
         {
-            _streamWriter?.Flush();
-            _streamWriter?.Dispose();
+            PrependMetadataHeader();
             _binaryWriter?.Flush();
             _binaryWriter?.Dispose();
         }
 
         public void WritePoint(CloudPoint point)
         {
-            if (_binaryMode)
-            {
-                var data = point.BinarySerialized();
-                _binaryWriter.Write(data);
-                return;
-            }
-
-            _streamWriter.WriteLine(point.StringSerialized());
+            _pointCounter++;
+            var data = point.BinarySerialized();
+            _binaryWriter.Write(data);
         }
 
         public void WritePoint(Point point)
         {
-            if (_binaryMode)
-            {
-                var data = point.BinarySerialized();
-                _binaryWriter.Write(data);
-                return;
-            }
-
-            _streamWriter.WriteLine(point.StringSerialized());
+            _pointCounter++;
+            var data = point.BinarySerialized();
+            _binaryWriter.Write(data);
         }
 
         public void WritePointSet(PointSet pointSet)
@@ -115,7 +109,7 @@ namespace ForestTaxator.Data.GPD
                 WritePointSet(pointSet, sliceId);
             }
         }
-        
+
         public void WritePointSetGroup(PointSetGroup pointSetGroup)
         {
             WritePointSetGroup(pointSetGroup, SliceId);

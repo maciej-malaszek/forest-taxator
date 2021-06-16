@@ -18,7 +18,7 @@ namespace ForestTaxator.TestApp.Flows
                 Environment.Exit(0);
             }
 
-            var streamReader = FileFormatDetector.GetCloudStreamReader(command.Input);
+            using var streamReader = FileFormatDetector.GetCloudStreamReader(command.Input);
             if (streamReader == null)
             {
                 logger.Fatal("Not supported data format.");
@@ -26,8 +26,8 @@ namespace ForestTaxator.TestApp.Flows
             }
             
             var cloud = new Cloud(streamReader);
+            Console.WriteLine(cloud[9] == null);
             var terrain = new Terrain(cloud);
-                
 
             return Task.CompletedTask;
             

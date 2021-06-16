@@ -20,7 +20,7 @@ namespace ForestTaxator.TestApp.Flows
 
             var baseOutput = string.Join(".", command.InputFile.Split(".").SkipLast(1));
             var reader = FileFormatDetector.GetCloudStreamReader(command.InputFile, command.InputFormat);
-            var writer = FileFormatDetector.GetCloudStreamWriter(
+            using var writer = FileFormatDetector.GetCloudStreamWriter(
                 command.OutputFile ?? $"{baseOutput}.{command.OutputFormat.ToString().ToLower()}",
                 command.OutputFormat
             );

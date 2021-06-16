@@ -51,13 +51,13 @@ namespace ForestTaxator.Data
             };
         }
         
-        public static ICloudStreamWriter GetCloudStreamWriter(string inputPath, ESupportedCloudFormat format)
+        public static ICloudStreamWriter GetCloudStreamWriter(string path, ESupportedCloudFormat format)
         {
             return format switch
             {
-                ESupportedCloudFormat.GPD => new GpdWriter(inputPath),
-                ESupportedCloudFormat.PCD => new PcdWriter(inputPath),
-                ESupportedCloudFormat.XYZ => new XyzWriter(inputPath), 
+                ESupportedCloudFormat.GPD => new GpdWriter(path, null, 0),
+                ESupportedCloudFormat.PCD => new PcdWriter(path),
+                ESupportedCloudFormat.XYZ => new XyzWriter(path), 
                 _ => null
             };
         }
