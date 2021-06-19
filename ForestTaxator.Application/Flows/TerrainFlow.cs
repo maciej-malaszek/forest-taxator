@@ -26,8 +26,8 @@ namespace ForestTaxator.TestApp.Flows
             }
             
             var cloud = new Cloud(streamReader);
-            Console.WriteLine(cloud[9] == null);
-            var terrain = new Terrain(cloud);
+            var terrain = new Terrain(cloud, command.Resolution);
+            terrain.Export(command.Output);
 
             return Task.CompletedTask;
             

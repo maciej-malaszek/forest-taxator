@@ -4,11 +4,11 @@ using System.Threading;
 
 namespace ForestTaxator.Model
 {
-    public class PointSlice
+    public class PointSlice : IPointSetGroup
     {
         public IList<PointSet> PointSets { get; set; }
         
-        public double Height { get; set; }
+        public double Height { get; init; }
 
         private RasterGrid Rasterize(float meshWidth = 0.1f, int minimumCloudPoints = 10)
         {

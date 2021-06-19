@@ -3,7 +3,7 @@ using ForestTaxator.Model;
 
 namespace ForestTaxator.Data.PCD
 {
-    public class PcdWriter : ICloudStreamWriter, IDisposable
+    public class PcdWriter : ICloudStreamWriter
     {
         public PcdWriter(string path)
         {
@@ -24,7 +24,7 @@ namespace ForestTaxator.Data.PCD
             throw new NotImplementedException();
         }
 
-        public void WritePointSetGroup(PointSetGroup pointSetGroup)
+        public void WritePointSetGroup(IPointSetGroup pointSetGroup)
         {
             throw new NotImplementedException();
         }

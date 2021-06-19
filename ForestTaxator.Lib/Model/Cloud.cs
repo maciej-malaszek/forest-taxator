@@ -17,7 +17,7 @@ namespace ForestTaxator.Model
             RecalculateBoundingBox();
         }
 
-        public IList<PointSlice> Slice(float height = 0.1f)
+        public IList<PointSlice> Slice(double height = 0.1)
         {
             return SplitByHeight(BoundingBox, height);
         }

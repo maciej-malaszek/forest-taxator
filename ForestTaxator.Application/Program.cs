@@ -44,6 +44,20 @@ namespace ForestTaxator.TestApp
     {
         private static HierarchicalProgress _consoleProgressBar;
         private static ILogger _logger;
+        
+        private static void Report(string status, double step, double total)
+        {
+            _consoleProgressBar.Report(step / total, status);
+        }
+
+        private static void PrepareProgressTracker()
+        {
+            ProgressTracker.Actions[EProgressStage.Slicing] = new Action<string, double, double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.NoiseFiltering] = new Action<string, double, double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.TreeApproximation] = new Action<string, double, double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.FakeTreesFiltering] = new Action<string, double, double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.TreeBuilding] = new Action<string, double, double>[] {Report};
+        }
 
         static void Main(string[] args)
         {
@@ -57,6 +71,7 @@ namespace ForestTaxator.TestApp
                 StatusOnSeparateLine = false
             };
             _consoleProgressBar = progressBar.HierarchicalProgress.Fork(1);
+            PrepareProgressTracker();
 
             var parsed = Parser.Default.ParseSetArguments<AnalyzeVerbSet, ConvertVerb>(args, OnVerbSetParsed);
             parsed.MapResult<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand, ConvertVerb, Task>
@@ -64,7 +79,7 @@ namespace ForestTaxator.TestApp
                 approximateCommand => Parser.Default.ExecuteMapping(approximateCommand, _ => Task.CompletedTask),
                 detectTreesCommand => Parser.Default.ExecuteMapping(detectTreesCommand, _ => Task.CompletedTask),
                 filterCommand => Parser.Default.ExecuteMapping(filterCommand, _ => Task.CompletedTask),
-                sliceCommand => Parser.Default.ExecuteMapping(sliceCommand, _ => Task.CompletedTask),
+                sliceCommand => Parser.Default.ExecuteMapping(sliceCommand, cmd => SlicingFlow.Execute(cmd, _logger)),
                 terrainCommand => Parser.Default.ExecuteMapping(terrainCommand, cmd => TerrainFlow.Execute(cmd, _logger)),
                 convertCommand => Parser.Default.ExecuteMapping(convertCommand, cmd => ConversionFlow.Execute(cmd, _logger)),
                 _ => Task.CompletedTask
@@ -256,18 +271,9 @@ namespace ForestTaxator.TestApp
             return geneticDistributionFilter;
         }
         
-        private static void Report(string status, double step, double total)
-        {
-            _consoleProgressBar.Report(step / total, status);
-        }
 
         private static Task DetectTree(DetectVerb detectVerb)
         {
-            ProgressTracker.Actions[EProgressStage.Slicing] = new Action<string, double, double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.NoiseFiltering] = new Action<string, double, double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.TreeApproximation] = new Action<string, double, double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.FakeTreesFiltering] = new Action<string, double, double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.TreeBuilding] = new Action<string, double, double>[] {Report};
             using var reader = new XyzReader(detectVerb.InputFile, Encoding.ASCII);
             var cloud = new Cloud(reader);
             cloud.NormalizeHeight();

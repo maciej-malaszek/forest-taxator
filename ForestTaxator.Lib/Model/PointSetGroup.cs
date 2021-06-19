@@ -6,7 +6,7 @@ using ForestTaxator.Utils;
 
 namespace ForestTaxator.Model
 {
-    public class PointSetGroup
+    public class PointSetGroup : IPointSetGroup
     {
         public IList<PointSet> PointSets { get; set; }
 

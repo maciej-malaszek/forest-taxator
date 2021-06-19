@@ -208,7 +208,7 @@ namespace ForestTaxator.Model
             return pointSet;
         }
 
-        public IList<PointSlice> SplitByHeight(Box analyzedBox, float sliceHeight)
+        public IList<PointSlice> SplitByHeight(Box analyzedBox, double sliceHeight)
         {
             var box = analyzedBox.Intersect(BoundingBox);
             var minZ = box.P1.Z;

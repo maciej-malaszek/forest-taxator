@@ -6,7 +6,7 @@ using ForestTaxator.Model;
 
 namespace ForestTaxator.Data.XYZ
 {
-    public class XyzWriter : ICloudStreamWriter, IDisposable
+    public class XyzWriter : ICloudStreamWriter
     {
         private readonly FileStream _fileStream;
         private readonly BufferedStream _bufferedStream;
@@ -50,7 +50,7 @@ namespace ForestTaxator.Data.XYZ
             _streamWriter.Flush();
         }
 
-        public void WritePointSetGroup(PointSetGroup pointSetGroup)
+        public void WritePointSetGroup(IPointSetGroup pointSetGroup)
         {
             foreach (var pointSet in pointSetGroup.PointSets)
             {

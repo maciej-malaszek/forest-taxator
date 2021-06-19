@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -102,7 +104,7 @@ namespace ForestTaxator.Data.GPD
             }
         }
 
-        public void WritePointSetGroup(PointSetGroup pointSetGroup, int sliceId)
+        public void WritePointSetGroup(IPointSetGroup pointSetGroup, int sliceId)
         {
             foreach (var pointSet in pointSetGroup.PointSets)
             {
@@ -110,9 +112,18 @@ namespace ForestTaxator.Data.GPD
             }
         }
 
-        public void WritePointSetGroup(PointSetGroup pointSetGroup)
+        public void WritePointSetGroup(IPointSetGroup pointSetGroup)
         {
             WritePointSetGroup(pointSetGroup, SliceId);
+        }
+        
+        public void WriteSlices(IEnumerable<IPointSetGroup> slices)
+        {
+            foreach (var slice in slices)
+            {
+                WritePointSetGroup(slice, SliceId++);                
+            }
+            
         }
     }
 }
