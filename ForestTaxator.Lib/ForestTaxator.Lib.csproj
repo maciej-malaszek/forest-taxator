@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="GeneticToolkit" Version="0.3.1" />
+      <PackageReference Include="GeneticToolkit" Version="0.3.2" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
     </ItemGroup>
 
