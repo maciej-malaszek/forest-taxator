@@ -15,8 +15,8 @@ namespace ForestTaxator.TestApp.Models
     }
     public class AspectRatioFilterConfiguration
     {
-        public double MinimumAspectRatio { get; set; }
-        public double MaximumAspectRatio { get; set; }
+        public float MinimumAspectRatio { get; set; }
+        public float MaximumAspectRatio { get; set; }
         public int Order { get; set; }
     }
     public class EllipsisMatchFilterConfiguration
@@ -26,6 +26,7 @@ namespace ForestTaxator.TestApp.Models
         public double BufferWidth { get; set; }
         public double InvalidEccentricityThreshold { get; set; }
         public string GeneticAlgorithmConfigurationFile { get; set; }
+        public int Order { get; set; }
     }
     
     public class FiltersConfiguration
@@ -35,6 +36,4 @@ namespace ForestTaxator.TestApp.Models
         public AspectRatioFilterConfiguration AspectRatioFilter { get; set; }
         public EllipsisMatchFilterConfiguration EllipsisMatchFilterConfiguration { get; set; }
     }
-
-  
 }

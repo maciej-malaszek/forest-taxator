@@ -20,4 +20,13 @@
       <ProjectReference Include="..\ForestTaxator.Lib\ForestTaxator.Lib.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Configs\FiltersConfiguration.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Configs\GeneticAlgorithm.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

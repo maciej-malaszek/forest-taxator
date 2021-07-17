@@ -63,8 +63,6 @@ namespace ForestTaxator.Algorithms
             return fitness;
         }
         
-        
-
         public virtual IIndividual FindBestIndividual(PointSet group, Ellipsis initializer = null)
         {
             if (group == null || group.Center.Z < 0.1)

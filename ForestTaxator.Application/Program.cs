@@ -78,7 +78,7 @@ namespace ForestTaxator.TestApp
             (
                 approximateCommand => Parser.Default.ExecuteMapping(approximateCommand, _ => Task.CompletedTask),
                 detectTreesCommand => Parser.Default.ExecuteMapping(detectTreesCommand, _ => Task.CompletedTask),
-                filterCommand => Parser.Default.ExecuteMapping(filterCommand, _ => Task.CompletedTask),
+                filterCommand => Parser.Default.ExecuteMapping(filterCommand, cmd => FilteringFlow.Execute(cmd, _logger)),
                 sliceCommand => Parser.Default.ExecuteMapping(sliceCommand, cmd => SlicingFlow.Execute(cmd, _logger)),
                 terrainCommand => Parser.Default.ExecuteMapping(terrainCommand, cmd => TerrainFlow.Execute(cmd, _logger)),
                 convertCommand => Parser.Default.ExecuteMapping(convertCommand, cmd => ConversionFlow.Execute(cmd, _logger)),

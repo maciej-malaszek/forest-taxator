@@ -1,0 +1,25 @@
+{
+  "LargeGroupsFilter": {
+    "Order": 1,
+    "LargeGroupsMaxSize": {
+      "variables": [
+        {
+          "name": "height",
+          "type": "System.Double",
+          "order": 1
+        }
+      ],
+      "expression": "2 * height"
+    }
+  },
+  "SmallGroupsFilter": null,
+  "AspectRatioFilter": null,
+  "EllipsisMatchFilterConfiguration": {
+    "FitnessThreshold": 0.1,
+    "MatchEccentricityThreshold": 0.80,
+    "BufferWidth": 0.002,
+    "InvalidEccentricityThreshold": 0.85,
+    "GeneticAlgorithmConfigurationFile": "Configs/GeneticAlgorithm.json",
+    "Order": 5
+  }
+}
