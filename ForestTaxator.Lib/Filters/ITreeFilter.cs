@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Filters
+namespace ForestTaxator.Lib.Filters
 {
     public interface ITreeFilter
     {

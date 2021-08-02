@@ -1,8 +1,8 @@
 using System;
-using static ForestTaxator.Utils.MathUtils;
-using static ForestTaxator.Utils.MathUtils.EDistanceMetric;
+using static ForestTaxator.Lib.Utils.MathUtils;
+using static ForestTaxator.Lib.Utils.MathUtils.EDistanceMetric;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class Ellipsis
     {

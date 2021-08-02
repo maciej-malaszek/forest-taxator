@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Data.XYZ
+namespace ForestTaxator.Lib.Data.XYZ
 {
     public class XyzReader : ICloudStreamReader, IDisposable
     {

@@ -1,7 +1,8 @@
 ﻿using System;
+
 // ReSharper disable PossibleLossOfFraction
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class RasterGrid
     {

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using ForestTaxator.Model;
-using ForestTaxator.Utils;
+using ForestTaxator.Lib.Model;
+using ForestTaxator.Lib.Utils;
 
-namespace ForestTaxator.Extensions
+namespace ForestTaxator.Lib.Extensions
 {
     public static class PointSetExtensions
     {

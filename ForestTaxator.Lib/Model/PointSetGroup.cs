@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using ForestTaxator.Algorithms;
-using ForestTaxator.Filters;
-using ForestTaxator.Utils;
+using ForestTaxator.Lib.Algorithms;
+using ForestTaxator.Lib.Filters;
+using ForestTaxator.Lib.Utils;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class PointSetGroup : IPointSetGroup
     {

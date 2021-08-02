@@ -1,7 +1,7 @@
 using System;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Data
+namespace ForestTaxator.Lib.Data
 {
     public interface ICloudStreamWriter : IDisposable
     {

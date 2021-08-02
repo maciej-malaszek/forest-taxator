@@ -1,67 +1,18 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using ForestTaxator.Model;
-using ForestTaxator.Utils;
+using ForestTaxator.Lib.Fitness;
+using ForestTaxator.Lib.Model;
 using GeneticToolkit;
 using GeneticToolkit.Genotypes.Collective;
 using GeneticToolkit.Interfaces;
-using GeneticToolkit.Phenotypes.Collective;
-using GeneticToolkit.Utils.FitnessFunctions;
 
-namespace ForestTaxator.Algorithms
+namespace ForestTaxator.Lib.Algorithms
 {
     public class GeneticEllipseMatch
     {
-        private PointSet _analyzedPointSet;
         public double EccentricityThreshold { get; set; }
         public double BufferWidth { get; set; }
         public GeneticAlgorithm GeneticAlgorithm { get; set; }
-        
-        public IFitnessFunction GetFitnessFunction() => new FitnessFunction(Fitness);
-        
-        public virtual double Fitness(IPhenotype p)
-        {
-            var phenotype = (CollectivePhenotype<EllipticParameters>)p;
-
-            var x = phenotype.GetValue();
-
-            var ellipsis = new Ellipsis(x, _analyzedPointSet.Center.Z);
-
-            if (ellipsis.Eccentricity > EccentricityThreshold)
-            {
-                return double.MaxValue;
-            }
-
-            double fitness = 0;
-            var counter = 0;
-
-            var offsetFoci1 = x.F1 + _analyzedPointSet.Center;
-            var offsetFoci2 = x.F2 + _analyzedPointSet.Center;
-            foreach (var point in _analyzedPointSet)
-            {
-                // Distance of point from Foci 1
-                var pf1 = MathUtils.Distance(point, offsetFoci1, MathUtils.EDistanceMetric.Euclidean, MathUtils.EDimension.X,
-                    MathUtils.EDimension.Y);
-                
-                // Distance of point from Foci 2
-                var pf2 = MathUtils.Distance(point, offsetFoci2, MathUtils.EDistanceMetric.Euclidean, MathUtils.EDimension.X,
-                    MathUtils.EDimension.Y);
-                
-                // Given two fixed points F1 and F2 called the foci, and a distance 2a, which is greater than the distance between the foci,
-                // the ellipse is the set of points P such that the sum of the distances PF1, PF2 is equal to 2a:
-                var dist = pf1 + pf2 - 2 * x.A;
-
-                var absoluteDistance = Math.Abs(dist); 
-                if (absoluteDistance > BufferWidth)
-                {
-                    fitness += absoluteDistance;
-                    counter++;
-                }
-            }
-            fitness /= counter;
-           
-            return fitness;
-        }
         
         public virtual IIndividual FindBestIndividual(PointSet group, Ellipsis initializer = null)
         {
@@ -70,7 +21,7 @@ namespace ForestTaxator.Algorithms
                 return null;
             }
 
-            _analyzedPointSet = group;
+            EllipsisMatchFitness.AnalyzedPointSet = group;
 
             ReinitializePopulation(initializer);
             GeneticAlgorithm.Reset();
@@ -97,7 +48,9 @@ namespace ForestTaxator.Algorithms
                 var offsetStepSize = OffsetDeviationInMeters / GeneticAlgorithm.Population.Size;
                 var halfOffsetDeviationInMeters = OffsetDeviationInMeters / 2;
 
-                var defaultRadius = (float) (0.5f * Math.Min(_analyzedPointSet.BoundingBox.Width, _analyzedPointSet.BoundingBox.Depth));
+                var analyzedPointSet = EllipsisMatchFitness.AnalyzedPointSet;
+
+                var defaultRadius = 0.5f * Math.Min(analyzedPointSet.BoundingBox.Width, analyzedPointSet.BoundingBox.Depth);
                 
                 for (var i = 0; i < GeneticAlgorithm.Population.Size; i++)
                 {

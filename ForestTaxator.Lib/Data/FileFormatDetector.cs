@@ -1,11 +1,11 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using ForestTaxator.Data.GPD;
-using ForestTaxator.Data.PCD;
-using ForestTaxator.Data.XYZ;
+using ForestTaxator.Lib.Data.GPD;
+using ForestTaxator.Lib.Data.PCD;
+using ForestTaxator.Lib.Data.XYZ;
 
-namespace ForestTaxator.Data
+namespace ForestTaxator.Lib.Data
 {
     public static class FileFormatDetector
     {

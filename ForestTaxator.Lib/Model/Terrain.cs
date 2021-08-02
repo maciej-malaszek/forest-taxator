@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 { 
     public class Terrain
     {

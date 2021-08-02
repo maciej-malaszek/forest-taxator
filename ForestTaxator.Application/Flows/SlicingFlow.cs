@@ -2,11 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ForestTaxator.Data;
-using ForestTaxator.Data.GPD;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Data;
+using ForestTaxator.Lib.Data.GPD;
+using ForestTaxator.Lib.Model;
 using ForestTaxator.TestApp.Commands.Analyze;
-using ForestTaxator.Utils;
 using Serilog;
 
 namespace ForestTaxator.TestApp.Flows

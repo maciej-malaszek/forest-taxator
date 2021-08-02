@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ForestTaxator.Utils
+namespace ForestTaxator.Lib.Utils
 {
     public class Distribution
     {

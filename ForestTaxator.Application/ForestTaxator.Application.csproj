@@ -24,7 +24,10 @@
       <None Update="Configs\FiltersConfiguration.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="Configs\GeneticAlgorithm.json">
+      <None Update="Configs\DetectionEllipsisMatch.GeneticAlgorithm.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Configs\Distribution.GeneticAlgorithm.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

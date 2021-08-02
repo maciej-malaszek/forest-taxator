@@ -1,7 +1,7 @@
 using System;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Data.PCD
+namespace ForestTaxator.Lib.Data.PCD
 {
     public class PcdWriter : ICloudStreamWriter
     {

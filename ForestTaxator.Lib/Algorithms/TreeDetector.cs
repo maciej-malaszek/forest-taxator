@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ForestTaxator.Filters;
-using ForestTaxator.Model;
-using ForestTaxator.Utils;
+using ForestTaxator.Lib.Filters;
+using ForestTaxator.Lib.Model;
+using ForestTaxator.Lib.Utils;
 using Microsoft.Extensions.Logging;
 
-namespace ForestTaxator.Algorithms
+namespace ForestTaxator.Lib.Algorithms
 {
     public class TreeDetector
     {

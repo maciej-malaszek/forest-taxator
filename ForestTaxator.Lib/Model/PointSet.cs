@@ -2,10 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ForestTaxator.Algorithms;
-using ForestTaxator.Utils;
+using ForestTaxator.Lib.Algorithms;
+using ForestTaxator.Lib.Utils;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class PointSet : IEnumerable<CloudPoint>
     {

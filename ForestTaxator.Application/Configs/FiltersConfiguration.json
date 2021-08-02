@@ -19,7 +19,22 @@
     "MatchEccentricityThreshold": 0.80,
     "BufferWidth": 0.002,
     "InvalidEccentricityThreshold": 0.85,
-    "GeneticAlgorithmConfigurationFile": "Configs/GeneticAlgorithm.json",
+    "GeneticAlgorithmConfigurationFile": "Configs/DetectionEllipsisMatch.GeneticAlgorithm.json",
     "Order": 5
+  },
+  "GeneticDistributionFilterConfiguration": {
+    "GeneticAlgorithmConfigurationFile": "Configs/Distribution.GeneticAlgorithm.json",
+    "DistributionResolution": 32,
+    "TrunkThreshold": {
+      "variables": [
+        {
+          "name": "height",
+          "type": "System.Double",
+          "order": 1
+        }
+      ],
+      "expression": "0.3"
+    },
+    "Order": 3
   }
 }

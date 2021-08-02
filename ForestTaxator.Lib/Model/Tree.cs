@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ForestTaxator.Algorithms;
-using static ForestTaxator.Utils.MathUtils;
-using static ForestTaxator.Utils.MathUtils.EDistanceMetric;
+using ForestTaxator.Lib.Algorithms;
+using static ForestTaxator.Lib.Utils.MathUtils;
+using static ForestTaxator.Lib.Utils.MathUtils.EDistanceMetric;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class Tree
     {

@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using ForestTaxator.Model;
-using ForestTaxator.Utils;
+using ForestTaxator.Lib.Model;
+using ForestTaxator.Lib.Utils;
 using GeneticToolkit.Interfaces;
 using GeneticToolkit.Phenotypes.Collective;
 
-namespace ForestTaxator.Algorithms
+namespace ForestTaxator.Lib.Algorithms
 {
     public class TreeApproximation
     {

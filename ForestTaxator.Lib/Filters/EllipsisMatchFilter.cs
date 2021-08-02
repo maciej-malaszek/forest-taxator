@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using ForestTaxator.Algorithms;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Algorithms;
+using ForestTaxator.Lib.Model;
 using GeneticToolkit.Phenotypes.Collective;
 
-
-namespace ForestTaxator.Filters
+namespace ForestTaxator.Lib.Filters
 {
     public class EllipsisMatchFilter : IPointSetFilter
     {
@@ -20,7 +19,7 @@ namespace ForestTaxator.Filters
         public bool ConditionMatched(PointSet pointSet, int index, int total)
         {
             var bestPossibleIndividual = GeneticEllipseMatch.FindBestIndividual(pointSet);
-            var fitness = GeneticEllipseMatch.Fitness(bestPossibleIndividual.Phenotype);
+            var fitness = GeneticEllipseMatch.GeneticAlgorithm.Population.FitnessFunction.GetValue(bestPossibleIndividual.Phenotype);
             var ellipseParameters = ((CollectivePhenotype<EllipticParameters>)bestPossibleIndividual.Phenotype).GetValue();
             var ellipse = new Ellipsis(ellipseParameters, 0);
             foreach (var t in pointSet)

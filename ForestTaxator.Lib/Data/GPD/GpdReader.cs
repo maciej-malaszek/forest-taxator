@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Data.GPD
+namespace ForestTaxator.Lib.Data.GPD
 {
     public class GpdReader : ICloudStreamReader
     {
@@ -126,10 +126,14 @@ namespace ForestTaxator.Data.GPD
             do
             {
                 pointSet = ReadPointSet();
-                pointSlices[_sliceId] ??= new PointSlice
+                if (pointSlices.ContainsKey(_sliceId) == false || pointSlices[_sliceId] is null)
                 {
-                    PointSets = new List<PointSet>()
-                };
+                    pointSlices[_sliceId] = new PointSlice
+                    {
+                        PointSets = new List<PointSet>()
+                    };
+                }
+
                 if (pointSet != null)
                 {
                     pointSlices[_sliceId].PointSets.Add(pointSet);

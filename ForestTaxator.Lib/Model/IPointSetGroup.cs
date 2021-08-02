@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public interface IPointSetGroup
     {

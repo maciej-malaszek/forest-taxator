@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using ForestTaxator.Data;
+using ForestTaxator.Lib.Data;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class Cloud : PointSet
     {

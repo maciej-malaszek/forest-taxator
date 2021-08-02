@@ -1,4 +1,4 @@
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public enum EProgressStage
     {

@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ForestTaxator.Data.Compression;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Data.Compression;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Data.PCD
+namespace ForestTaxator.Lib.Data.PCD
 {
     public class PcdReader : ICloudStreamReader
     {

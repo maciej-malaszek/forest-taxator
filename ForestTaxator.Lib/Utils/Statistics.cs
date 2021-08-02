@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ForestTaxator.Utils
+namespace ForestTaxator.Lib.Utils
 {
     public static class Statistics
     {

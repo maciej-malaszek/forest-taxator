@@ -1,9 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Data
+namespace ForestTaxator.Lib.Data
 {
     public interface ICloudStreamReader : IDisposable
     {

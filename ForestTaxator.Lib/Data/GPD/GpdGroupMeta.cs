@@ -1,4 +1,4 @@
-namespace ForestTaxator.Data.GPD
+namespace ForestTaxator.Lib.Data.GPD
 {
     public class GpdGroupMeta
     {

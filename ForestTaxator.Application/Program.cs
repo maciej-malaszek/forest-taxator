@@ -2,39 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
 using ConsoleProgressBar;
-using ForestTaxator.Algorithms;
-using ForestTaxator.Data;
-using ForestTaxator.Data.PCD;
-using ForestTaxator.Data.XYZ;
-using ForestTaxator.Extensions;
-using ForestTaxator.Filters;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
+using ForestTaxator.Lib.Utils;
 using ForestTaxator.TestApp.Commands;
 using ForestTaxator.TestApp.Commands.Analyze;
 using ForestTaxator.TestApp.Commands.Extensions;
 using ForestTaxator.TestApp.Flows;
-using ForestTaxator.Utils;
-using GeneticToolkit;
-using GeneticToolkit.Comparisons;
-using GeneticToolkit.Crossovers;
-using GeneticToolkit.Genotypes.Collective;
-using GeneticToolkit.Interfaces;
-using GeneticToolkit.Mutations;
-using GeneticToolkit.Phenotypes.Collective;
-using GeneticToolkit.Policies.Heaven;
-using GeneticToolkit.Policies.Incompatibility;
-using GeneticToolkit.Policies.Mutation;
-using GeneticToolkit.Policies.Resize;
-using GeneticToolkit.Policies.Stop;
-using GeneticToolkit.Populations;
-using GeneticToolkit.Selections;
-using GeneticToolkit.Utils;
-using GeneticToolkit.Utils.Factories;
 using ProgressHierarchy;
 using Serilog;
 
@@ -95,254 +72,253 @@ namespace ForestTaxator.TestApp
                 _ => parsed);
         }
 
-        private static GeneticEllipseMatch PrepareGeneticEllipseMatchAlgorithm()
-        {
-            var geneticEllipseMatch = new GeneticEllipseMatch
-            {
-                BufferWidth = 0.002,
-                EccentricityThreshold = 0.85,
-            };
-            var fitnessFunction = geneticEllipseMatch.GetFitnessFunction();
-            var factory = new CollectivePhenotypeFactory<EllipticParameters>();
-            var individualFactory =
-                new IndividualFactory<CollectiveGenotype<EllipticParameters>, CollectivePhenotype<EllipticParameters>>(factory,
-                    fitnessFunction);
-            var compareCriteria = new SimpleComparison(fitnessFunction, EOptimizationMode.Minimize);
-            var geneticAlgorithm = new GeneticAlgorithm
-            {
-                StopConditions = new IStopCondition[]
-                {
-                    new TimeSpanCondition(TimeSpan.FromSeconds(25f)),
-                    new PopulationDegradation(0.9f),
-                    new SufficientIndividual(fitnessFunction, 0.0001f)
-                },
-                StopConditionMode = EStopConditionMode.Any,
-                Population = new Population(fitnessFunction, 30)
-                {
-                    CompareCriteria = compareCriteria,
-                    Crossover = new SinglePointCrossover(),
-                    HeavenPolicy = new OneGod(),
-                    Mutation = new ArithmeticMutation(new[]
-                        {
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10)
-                        },
-                        new[]
-                        {
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte
-                        }
-                    ),
-                    MutationPolicy = new HesserMannerMutation(1, 1, 0.1f),
-                    ResizePolicy = new ConstantResizePolicy(),
-                    IndividualFactory = individualFactory,
-                    IncompatibilityPolicy = new AllowAll(),
-                    SelectionMethod = new Tournament(compareCriteria, 0.01f),
-                    StatisticUtilities = new Dictionary<string, IStatisticUtility>()
-                }
-            };
-            geneticEllipseMatch.GeneticAlgorithm = geneticAlgorithm;
+        // private static GeneticEllipseMatch PrepareGeneticEllipseMatchAlgorithm()
+        // {
+        //     var geneticEllipseMatch = new GeneticEllipseMatch
+        //     {
+        //         BufferWidth = 0.002,
+        //         EccentricityThreshold = 0.85,
+        //     };
+        //     var fitnessFunction = geneticEllipseMatch.GetFitnessFunction();
+        //     var factory = new CollectivePhenotypeFactory<EllipticParameters>();
+        //     var individualFactory =
+        //         new IndividualFactory<CollectiveGenotype<EllipticParameters>, CollectivePhenotype<EllipticParameters>>(factory,
+        //             fitnessFunction);
+        //     var compareCriteria = new SimpleComparison(fitnessFunction, EOptimizationMode.Minimize);
+        //     var geneticAlgorithm = new GeneticAlgorithm
+        //     {
+        //         StopConditions = new IStopCondition[]
+        //         {
+        //             new TimeSpanCondition(TimeSpan.FromSeconds(25f)),
+        //             new PopulationDegradation(0.9f),
+        //             new SufficientIndividual(fitnessFunction, 0.0001f)
+        //         },
+        //         StopConditionMode = EStopConditionMode.Any,
+        //         Population = new Population(fitnessFunction, 30)
+        //         {
+        //             CompareCriteria = compareCriteria,
+        //             Crossover = new SinglePointCrossover(),
+        //             HeavenPolicy = new OneGod(),
+        //             Mutation = new ArithmeticMutation(new[]
+        //                 {
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10)
+        //                 },
+        //                 new[]
+        //                 {
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte
+        //                 }
+        //             ),
+        //             MutationPolicy = new HesserMannerMutation(1, 1, 0.1f),
+        //             ResizePolicy = new ConstantResizePolicy(),
+        //             IndividualFactory = individualFactory,
+        //             IncompatibilityPolicy = new AllowAll(),
+        //             SelectionMethod = new Tournament(compareCriteria, 0.01f),
+        //             StatisticUtilities = new Dictionary<string, IStatisticUtility>()
+        //         }
+        //     };
+        //     geneticEllipseMatch.GeneticAlgorithm = geneticAlgorithm;
+        //
+        //     return geneticEllipseMatch;
+        // }
 
-            return geneticEllipseMatch;
-        }
+        // private static EllipsisMatchFilter PrepareEllipsisMatchFilter()
+        // {
+        //     var filter = new EllipsisMatchFilter
+        //     {
+        //         FitnessThreshold = 0.1,
+        //         EccentricityThreshold = 0.80,
+        //         GeneticEllipseMatch = new GeneticEllipseMatch
+        //         {
+        //             BufferWidth = 0.01,
+        //             EccentricityThreshold = 0.85,
+        //         }
+        //     };
+        //     var fitnessFunction = filter.GeneticEllipseMatch.GetFitnessFunction();
+        //
+        //     var factory = new CollectivePhenotypeFactory<EllipticParameters>();
+        //     var individualFactory =
+        //         new IndividualFactory<CollectiveGenotype<EllipticParameters>, CollectivePhenotype<EllipticParameters>>(factory,
+        //             fitnessFunction);
+        //     var compareCriteria = new SimpleComparison(fitnessFunction, EOptimizationMode.Minimize);
+        //     var geneticAlgorithm = new GeneticAlgorithm
+        //     {
+        //         StopConditions = new IStopCondition[]
+        //         {
+        //             new TimeSpanCondition(TimeSpan.FromSeconds(0.3f)),
+        //             new PopulationDegradation(0.9f),
+        //             new SufficientIndividual(fitnessFunction, filter.FitnessThreshold - 0.001f)
+        //         },
+        //         StopConditionMode = EStopConditionMode.Any,
+        //         Population = new Population(fitnessFunction, 60)
+        //         {
+        //             CompareCriteria = compareCriteria,
+        //             Crossover = new SinglePointCrossover(),
+        //             HeavenPolicy = new OneGod(),
+        //             Mutation = new ArithmeticMutation(new[]
+        //                 {
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10)
+        //                 },
+        //                 new[]
+        //                 {
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte
+        //                 }
+        //             ),
+        //             MutationPolicy = new HesserMannerMutation(1, 1, 0.1f),
+        //             ResizePolicy = new ConstantResizePolicy(),
+        //             IndividualFactory = individualFactory,
+        //             IncompatibilityPolicy = new AllowAll(),
+        //             SelectionMethod = new Tournament(compareCriteria, 0.01f),
+        //             StatisticUtilities = new Dictionary<string, IStatisticUtility>()
+        //         }
+        //     };
+        //
+        //     filter.GeneticEllipseMatch.GeneticAlgorithm = geneticAlgorithm;
+        //     return filter;
+        // }
+        //
+        // private static GeneticDistributionFilter PrepareGeneticDistributionFilter(float threshold = 0.22f)
+        // {
+        //     var geneticDistributionFilter = new GeneticDistributionFilter(new GeneticDistributionFilterParams
+        //     {
+        //         GetTrunkThreshold = _ => threshold
+        //     });
+        //     var fitnessFunction = geneticDistributionFilter.GetFitnessFunction();
+        //
+        //     var factory = new CollectivePhenotypeFactory<ParabolicParameters>();
+        //     var individualFactory =
+        //         new IndividualFactory<CollectiveGenotype<ParabolicParameters>, CollectivePhenotype<ParabolicParameters>>(factory, fitnessFunction);
+        //     var compareCriteria = new SimpleComparison(fitnessFunction, EOptimizationMode.Minimize);
+        //     var geneticAlgorithm = new GeneticAlgorithm
+        //     {
+        //         StopConditions = new IStopCondition[]
+        //         {
+        //             new TimeSpanCondition(TimeSpan.FromSeconds(0.3f)),
+        //             new PopulationDegradation(0.9f),
+        //             new SufficientIndividual(fitnessFunction, threshold - 0.001f)
+        //         },
+        //         StopConditionMode = EStopConditionMode.Any,
+        //         Population = new Population(fitnessFunction, 60)
+        //         {
+        //             CompareCriteria = compareCriteria,
+        //             Crossover = new SinglePointCrossover(),
+        //             HeavenPolicy = new OneGod(),
+        //             Mutation = new ArithmeticMutation(new[]
+        //                 {
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10),
+        //                     new Range<float>(-10, 10)
+        //                 },
+        //                 new[]
+        //                 {
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte,
+        //                     ArithmeticMutation.EMode.Byte
+        //                 }
+        //             ),
+        //             MutationPolicy = new HesserMannerMutation(1, 1, 0.1f),
+        //             ResizePolicy = new ConstantResizePolicy(),
+        //             IndividualFactory = individualFactory,
+        //             IncompatibilityPolicy = new AllowAll(),
+        //             SelectionMethod = new Tournament(compareCriteria, 0.01f),
+        //             StatisticUtilities = new Dictionary<string, IStatisticUtility>()
+        //         }
+        //     };
+        //     geneticDistributionFilter.GeneticAlgorithm = geneticAlgorithm;
+        //     return geneticDistributionFilter;
+        // }
+        //
 
-        private static EllipsisMatchFilter PrepareEllipsisMatchFilter()
-        {
-            var filter = new EllipsisMatchFilter
-            {
-                FitnessThreshold = 0.1,
-                EccentricityThreshold = 0.80,
-                GeneticEllipseMatch = new GeneticEllipseMatch
-                {
-                    BufferWidth = 0.01,
-                    EccentricityThreshold = 0.85,
-                }
-            };
-            var fitnessFunction = filter.GeneticEllipseMatch.GetFitnessFunction();
-
-            var factory = new CollectivePhenotypeFactory<EllipticParameters>();
-            var individualFactory =
-                new IndividualFactory<CollectiveGenotype<EllipticParameters>, CollectivePhenotype<EllipticParameters>>(factory,
-                    fitnessFunction);
-            var compareCriteria = new SimpleComparison(fitnessFunction, EOptimizationMode.Minimize);
-            var geneticAlgorithm = new GeneticAlgorithm
-            {
-                StopConditions = new IStopCondition[]
-                {
-                    new TimeSpanCondition(TimeSpan.FromSeconds(0.3f)),
-                    new PopulationDegradation(0.9f),
-                    new SufficientIndividual(fitnessFunction, filter.FitnessThreshold - 0.001f)
-                },
-                StopConditionMode = EStopConditionMode.Any,
-                Population = new Population(fitnessFunction, 60)
-                {
-                    CompareCriteria = compareCriteria,
-                    Crossover = new SinglePointCrossover(),
-                    HeavenPolicy = new OneGod(),
-                    Mutation = new ArithmeticMutation(new[]
-                        {
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10)
-                        },
-                        new[]
-                        {
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte
-                        }
-                    ),
-                    MutationPolicy = new HesserMannerMutation(1, 1, 0.1f),
-                    ResizePolicy = new ConstantResizePolicy(),
-                    IndividualFactory = individualFactory,
-                    IncompatibilityPolicy = new AllowAll(),
-                    SelectionMethod = new Tournament(compareCriteria, 0.01f),
-                    StatisticUtilities = new Dictionary<string, IStatisticUtility>()
-                }
-            };
-
-            filter.GeneticEllipseMatch.GeneticAlgorithm = geneticAlgorithm;
-            return filter;
-        }
-
-        private static GeneticDistributionFilter PrepareGeneticDistributionFilter(float threshold = 0.22f)
-        {
-            var geneticDistributionFilter = new GeneticDistributionFilter(new GeneticDistributionFilterParams
-            {
-                GetTrunkThreshold = _ => threshold
-            });
-            var fitnessFunction = geneticDistributionFilter.GetFitnessFunction();
-
-            var factory = new CollectivePhenotypeFactory<ParabolicParameters>();
-            var individualFactory =
-                new IndividualFactory<CollectiveGenotype<ParabolicParameters>, CollectivePhenotype<ParabolicParameters>>(factory,
-                    fitnessFunction);
-            var compareCriteria = new SimpleComparison(fitnessFunction, EOptimizationMode.Minimize);
-            var geneticAlgorithm = new GeneticAlgorithm
-            {
-                StopConditions = new IStopCondition[]
-                {
-                    new TimeSpanCondition(TimeSpan.FromSeconds(0.3f)),
-                    new PopulationDegradation(0.9f),
-                    new SufficientIndividual(fitnessFunction, threshold - 0.001f)
-                },
-                StopConditionMode = EStopConditionMode.Any,
-                Population = new Population(fitnessFunction, 60)
-                {
-                    CompareCriteria = compareCriteria,
-                    Crossover = new SinglePointCrossover(),
-                    HeavenPolicy = new OneGod(),
-                    Mutation = new ArithmeticMutation(new[]
-                        {
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10),
-                            new Range<float>(-10, 10)
-                        },
-                        new[]
-                        {
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte,
-                            ArithmeticMutation.EMode.Byte
-                        }
-                    ),
-                    MutationPolicy = new HesserMannerMutation(1, 1, 0.1f),
-                    ResizePolicy = new ConstantResizePolicy(),
-                    IndividualFactory = individualFactory,
-                    IncompatibilityPolicy = new AllowAll(),
-                    SelectionMethod = new Tournament(compareCriteria, 0.01f),
-                    StatisticUtilities = new Dictionary<string, IStatisticUtility>()
-                }
-            };
-            geneticDistributionFilter.GeneticAlgorithm = geneticAlgorithm;
-            return geneticDistributionFilter;
-        }
-        
-
-        private static Task DetectTree(DetectVerb detectVerb)
-        {
-            using var reader = new XyzReader(detectVerb.InputFile, Encoding.ASCII);
-            var cloud = new Cloud(reader);
-            cloud.NormalizeHeight();
-
-            var terrain = new Terrain(cloud);
-            var treeDetector = new TreeDetector();
-
-            IPointSetFilter[] pointSetFilters =
-            {
-                new LargeGroupsFilter(p => Math.Max(0.1f, 0.75f - 0.01f * p)),
-                new AspectRatioFilter(0.85f, 1.2f),
-                new SmallGroupsFilter(p => Math.Max(0.05f, 0.3f - 0.02f * p)),
-                PrepareGeneticDistributionFilter(0.3f),
-                PrepareEllipsisMatchFilter()
-            };
-
-            var detectionParameters = new DetectionParameters
-            {
-                PointSetFilters = pointSetFilters
-            };
-            var mergingParameters = new MergingParameters
-            {
-                MinimumRegressionGroupingDistance = 0.09,
-                MaximumGroupingEmptyHeight = 20,
-                MinimumGroupingDistance = 0.35,
-            };
-            var x = 0;
-
-            Directory.CreateDirectory(detectVerb.OutputDirectory);
-
-            var trees = treeDetector.DetectPotentialTrees(cloud, detectionParameters, mergingParameters).ToList();
-
-
-            var approximation = new TreeApproximation(PrepareGeneticEllipseMatchAlgorithm(), 0.8, 0.01f);
-            foreach (var detectedTree in trees)
-            {
-                var tree = approximation.ApproximateTree(detectedTree, terrain);
-                using var writer1 = new XyzWriter($"{detectVerb.OutputDirectory}/T{x++}.e.xyz");
-                using var writer2 = new XyzWriter($"{detectVerb.OutputDirectory}/T{x++}.xyz");
-                var ellipses = tree.GetAllNodesAsVector().Select(node => node.Ellipse).Where(ellipsis => ellipsis != null);
-                foreach (var ellipse in ellipses)
-                {
-                    ellipse.ExportToStream(writer1);
-                }
-
-                foreach (var node in tree.GetAllNodesAsVector())
-                {
-                    writer2.WritePointSet(node.PointSet);
-                }
-            }
-
-            return Task.CompletedTask;
-
-            // var pointSetGroups = treeDetector.DetectTrunkPointSets(cloud, detectionParameters).ToList();
-            // using var writer = new XyzWriter($"{detectVerb.OutputDirectory}/trunk.xyz");
-            //
-            // foreach (var pointSetGroup in pointSetGroups)
-            // {
-            //     var pointSetSize = pointSetGroup.PointSets.Select(pointSet => pointSet.Count).Sum();
-            //     if (pointSetSize <= 0)
-            //     {
-            //         continue;
-            //     }
-            //
-            //     foreach (var t in pointSetGroup.PointSets)
-            //     {
-            //         writer.WritePointSet(t);
-            //     }
-            // }
-        }
+        // private static Task DetectTree(DetectVerb detectVerb)
+        // {
+        //     using var reader = new XyzReader(detectVerb.InputFile, Encoding.ASCII);
+        //     var cloud = new Cloud(reader);
+        //     cloud.NormalizeHeight();
+        //
+        //     var terrain = new Terrain(cloud);
+        //     var treeDetector = new TreeDetector();
+        //
+        //     IPointSetFilter[] pointSetFilters =
+        //     {
+        //         new LargeGroupsFilter(p => Math.Max(0.1f, 0.75f - 0.01f * p)),
+        //         new AspectRatioFilter(0.85f, 1.2f),
+        //         new SmallGroupsFilter(p => Math.Max(0.05f, 0.3f - 0.02f * p)),
+        //         PrepareGeneticDistributionFilter(0.3f),
+        //         PrepareEllipsisMatchFilter()
+        //     };
+        //
+        //     var detectionParameters = new DetectionParameters
+        //     {
+        //         PointSetFilters = pointSetFilters
+        //     };
+        //     var mergingParameters = new MergingParameters
+        //     {
+        //         MinimumRegressionGroupingDistance = 0.09,
+        //         MaximumGroupingEmptyHeight = 20,
+        //         MinimumGroupingDistance = 0.35,
+        //     };
+        //     var x = 0;
+        //
+        //     Directory.CreateDirectory(detectVerb.OutputDirectory);
+        //
+        //     var trees = treeDetector.DetectPotentialTrees(cloud, detectionParameters, mergingParameters).ToList();
+        //
+        //
+        //     var approximation = new TreeApproximation(PrepareGeneticEllipseMatchAlgorithm(), 0.8, 0.01f);
+        //     foreach (var detectedTree in trees)
+        //     {
+        //         var tree = approximation.ApproximateTree(detectedTree, terrain);
+        //         using var writer1 = new XyzWriter($"{detectVerb.OutputDirectory}/T{x++}.e.xyz");
+        //         using var writer2 = new XyzWriter($"{detectVerb.OutputDirectory}/T{x++}.xyz");
+        //         var ellipses = tree.GetAllNodesAsVector().Select(node => node.Ellipse).Where(ellipsis => ellipsis != null);
+        //         foreach (var ellipse in ellipses)
+        //         {
+        //             ellipse.ExportToStream(writer1);
+        //         }
+        //
+        //         foreach (var node in tree.GetAllNodesAsVector())
+        //         {
+        //             writer2.WritePointSet(node.PointSet);
+        //         }
+        //     }
+        //
+        //     return Task.CompletedTask;
+        //
+        //     // var pointSetGroups = treeDetector.DetectTrunkPointSets(cloud, detectionParameters).ToList();
+        //     // using var writer = new XyzWriter($"{detectVerb.OutputDirectory}/trunk.xyz");
+        //     //
+        //     // foreach (var pointSetGroup in pointSetGroups)
+        //     // {
+        //     //     var pointSetSize = pointSetGroup.PointSets.Select(pointSet => pointSet.Count).Sum();
+        //     //     if (pointSetSize <= 0)
+        //     //     {
+        //     //         continue;
+        //     //     }
+        //     //
+        //     //     foreach (var t in pointSetGroup.PointSets)
+        //     //     {
+        //     //         writer.WritePointSet(t);
+        //     //     }
+        //     // }
+        // }
     }
 }

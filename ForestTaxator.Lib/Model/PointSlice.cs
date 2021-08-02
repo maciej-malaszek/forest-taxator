@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class PointSlice : IPointSetGroup
     {

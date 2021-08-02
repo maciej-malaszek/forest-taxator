@@ -4,9 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ForestTaxator.Model;
 
-namespace ForestTaxator.Data.GPD
+namespace ForestTaxator.Lib.Data.GPD
 {
     public class GpdHeader
     {

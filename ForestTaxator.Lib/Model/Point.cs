@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class Point
     {

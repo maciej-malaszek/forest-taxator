@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class RTree
     {

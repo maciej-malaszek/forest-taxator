@@ -1,4 +1,4 @@
-namespace ForestTaxator.Data
+namespace ForestTaxator.Lib.Data
 {
     public enum ESupportedFormat
     {

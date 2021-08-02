@@ -2,12 +2,15 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <RootNamespace>ForestTaxator</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="GeneticToolkit" Version="0.3.3" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\GeneticToolkit\GeneticToolkit\GeneticToolkit.csproj" />
     </ItemGroup>
 
 </Project>

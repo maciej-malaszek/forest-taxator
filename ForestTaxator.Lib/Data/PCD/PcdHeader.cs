@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace ForestTaxator.Data.PCD
+namespace ForestTaxator.Lib.Data.PCD
 {
     public class PcdHeader
     {

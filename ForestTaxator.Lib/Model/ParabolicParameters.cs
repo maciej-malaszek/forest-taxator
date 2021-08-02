@@ -1,9 +1,9 @@
-﻿using GeneticToolkit.Interfaces;
-using GeneticToolkit.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using GeneticToolkit.Interfaces;
+using GeneticToolkit.Utils;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class ParabolicParameters : IGeneticallySerializable
     {

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Filters
+namespace ForestTaxator.Lib.Filters
 {
     public class DensityFilter : IPointSetFilter
     {

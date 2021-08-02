@@ -1,7 +1,7 @@
-using ForestTaxator.Data;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Data;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Extensions
+namespace ForestTaxator.Lib.Extensions
 {
     public static class TreeExtensions
     {

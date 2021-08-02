@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
 
-namespace ForestTaxator.Utils
+namespace ForestTaxator.Lib.Utils
 {
     public static class MathUtils
     {

@@ -1,4 +1,4 @@
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Model;
 using NUnit.Framework;
 
 namespace ForestTaxator.UnitTests.Utils.MathUtils
@@ -15,11 +15,11 @@ namespace ForestTaxator.UnitTests.Utils.MathUtils
         {
             var p1 = new Point(x1, y1, z1);
             var p2 = new Point(x2, y2, z2);
-            var distance = ForestTaxator.Utils.MathUtils.Distance(p1, p2, 
-                ForestTaxator.Utils.MathUtils.EDistanceMetric.Euclidean,
-                ForestTaxator.Utils.MathUtils.EDimension.X, 
-                ForestTaxator.Utils.MathUtils.EDimension.Y,
-                ForestTaxator.Utils.MathUtils.EDimension.Z);
+            var distance = Lib.Utils.MathUtils.Distance(p1, p2, 
+                Lib.Utils.MathUtils.EDistanceMetric.Euclidean,
+                Lib.Utils.MathUtils.EDimension.X, 
+                Lib.Utils.MathUtils.EDimension.Y,
+                Lib.Utils.MathUtils.EDimension.Z);
             
             Assert.AreEqual(expectedDistance, distance, float.Epsilon);
         }

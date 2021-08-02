@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using ForestTaxator.Data;
-using ForestTaxator.Model;
+using ForestTaxator.Lib.Data;
+using ForestTaxator.Lib.Model;
 using ForestTaxator.TestApp.Commands.Analyze;
 using Serilog;
 

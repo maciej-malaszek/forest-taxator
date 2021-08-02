@@ -1,8 +1,8 @@
-﻿using GeneticToolkit.Interfaces;
+﻿using System.Collections.Generic;
+using GeneticToolkit.Interfaces;
 using GeneticToolkit.Utils;
-using System.Collections.Generic;
 
-namespace ForestTaxator.Model
+namespace ForestTaxator.Lib.Model
 {
     public class EllipticParameters : IGeneticallySerializable
     {
