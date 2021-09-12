@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Flee.PublicTypes;
 
-namespace ForestTaxator.TestApp.Utils
+namespace ForestTaxator.Application.Utils
 {
     public static class FunctionBuilder<T>
     {

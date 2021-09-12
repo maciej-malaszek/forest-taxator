@@ -1,7 +1,7 @@
 using CommandLine;
 using ForestTaxator.Lib.Data;
 
-namespace ForestTaxator.TestApp.Commands
+namespace ForestTaxator.Application.Commands
 {
     [Verb("convert")]
     public class ConvertVerb

@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
 using ConsoleProgressBar;
+using ForestTaxator.Application.Commands;
+using ForestTaxator.Application.Commands.Analyze;
+using ForestTaxator.Application.Commands.Extensions;
+using ForestTaxator.Application.Flows;
 using ForestTaxator.Lib.Model;
 using ForestTaxator.Lib.Utils;
-using ForestTaxator.TestApp.Commands;
-using ForestTaxator.TestApp.Commands.Analyze;
-using ForestTaxator.TestApp.Commands.Extensions;
-using ForestTaxator.TestApp.Flows;
 using ProgressHierarchy;
 using Serilog;
 
-namespace ForestTaxator.TestApp
+namespace ForestTaxator.Application
 {
     class Program
     {
@@ -53,8 +50,8 @@ namespace ForestTaxator.TestApp
             var parsed = Parser.Default.ParseSetArguments<AnalyzeVerbSet, ConvertVerb>(args, OnVerbSetParsed);
             parsed.MapResult<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand, ConvertVerb, Task>
             (
-                approximateCommand => Parser.Default.ExecuteMapping(approximateCommand, _ => Task.CompletedTask),
-                detectTreesCommand => Parser.Default.ExecuteMapping(detectTreesCommand, _ => Task.CompletedTask),
+                approximateCommand => Parser.Default.ExecuteMapping(approximateCommand, cmd => ApproximationFlow.Execute(cmd, _logger)),
+                detectTreesCommand => Parser.Default.ExecuteMapping(detectTreesCommand, cmd => DetectionFlow.Execute(cmd, _logger)),
                 filterCommand => Parser.Default.ExecuteMapping(filterCommand, cmd => FilteringFlow.Execute(cmd, _logger)),
                 sliceCommand => Parser.Default.ExecuteMapping(sliceCommand, cmd => SlicingFlow.Execute(cmd, _logger)),
                 terrainCommand => Parser.Default.ExecuteMapping(terrainCommand, cmd => TerrainFlow.Execute(cmd, _logger)),

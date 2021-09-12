@@ -1,12 +1,12 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using ForestTaxator.Application.Commands.Analyze;
 using ForestTaxator.Lib.Data;
 using ForestTaxator.Lib.Model;
-using ForestTaxator.TestApp.Commands.Analyze;
 using Serilog;
 
-namespace ForestTaxator.TestApp.Flows
+namespace ForestTaxator.Application.Flows
 {
     public static class TerrainFlow
     {

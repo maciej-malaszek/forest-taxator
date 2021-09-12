@@ -1,0 +1,11 @@
+{
+  "EccentricityThreshold": 0.8,
+  "FitnessThreshold": 0.01,
+  "EllipsisMatchConfiguration": {
+    "FitnessThreshold": 0.1,
+    "MatchEccentricityThreshold": 0.80,
+    "BufferWidth": 0.002,
+    "InvalidEccentricityThreshold": 0.85,
+    "GeneticAlgorithmConfigurationFile": "Configs/DetectionEllipsisMatch.GeneticAlgorithm.json"
+  }
+}

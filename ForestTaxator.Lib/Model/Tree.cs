@@ -507,10 +507,11 @@ namespace ForestTaxator.Lib.Model
             public Tree Tree { get; set; }
             public List<Node> Children { get; set; } = new List<Node>();
 
-            public void AddChild(PointSet pointSet)
+            public Node AddChild(PointSet pointSet)
             {
                 Children.Add(new Node(pointSet) {Tree = Tree});
                 Children[^1].Parent = this;
+                return Children[^1];
             }
 
             public void AddChild(Node node)

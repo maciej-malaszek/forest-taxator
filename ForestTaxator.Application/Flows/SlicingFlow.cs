@@ -2,13 +2,13 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ForestTaxator.Application.Commands.Analyze;
 using ForestTaxator.Lib.Data;
 using ForestTaxator.Lib.Data.GPD;
 using ForestTaxator.Lib.Model;
-using ForestTaxator.TestApp.Commands.Analyze;
 using Serilog;
 
-namespace ForestTaxator.TestApp.Flows
+namespace ForestTaxator.Application.Flows
 {
     public class SlicingFlow
     {
@@ -27,14 +27,31 @@ namespace ForestTaxator.TestApp.Flows
                 Environment.Exit(0);
             }
             
+            if (File.Exists(command.TerrainPath) == false)
+            {
+                logger.Fatal("Terrain file does not exist!");
+                Environment.Exit(0);
+            }
+            
             var cloud = new Cloud(streamReader);
+            var terrain = Terrain.Import(command.TerrainPath);
+
             
             var slices = cloud.Slice(command.SliceHeight).Where(slice => slice != null).OrderBy(slice => slice.Height).ToList();
+            foreach (var pointSlice in slices)
+            {
+                foreach (var pointSet in pointSlice.PointSets)
+                {
+                    foreach (var point in pointSet)
+                    {
+                        point.Z -= terrain.GetHeight(point);
+                    }
+                }
+            }
             using var writer = new GpdWriter(command.Output, null, (float)command.SliceHeight);
             writer.WriteSlices(slices);
             
             return Task.CompletedTask;
-            
         }
     }
 }

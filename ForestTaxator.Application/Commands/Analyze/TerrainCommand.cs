@@ -1,6 +1,6 @@
 using CommandLine;
 
-namespace ForestTaxator.TestApp.Commands.Analyze
+namespace ForestTaxator.Application.Commands.Analyze
 {
     [Verb("terrain")]
     public class TerrainCommand

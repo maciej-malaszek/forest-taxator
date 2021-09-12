@@ -33,6 +33,7 @@ namespace ForestTaxator.Lib.Model
             {
                 if (BoundingBoxDeprecated)
                 {
+                    Center = null;
                     return BoundingBox = Box.Find(this);
                 }
 
@@ -40,6 +41,7 @@ namespace ForestTaxator.Lib.Model
             }
             private set
             {
+                Center = null;
                 _boundingBox = value;
                 BoundingBoxDeprecated = false;
             }
@@ -58,13 +60,13 @@ namespace ForestTaxator.Lib.Model
         public PointSet()
         {
             BoundingBoxDeprecated = true;
-            CenterPoint = new Point();
+            CenterPoint = null;
         }
         
         public PointSet(int size)
         {
             BoundingBoxDeprecated = true;
-            CenterPoint = new Point();
+            CenterPoint = null;
             Points = new List<CloudPoint>(size);
         }
 
@@ -72,7 +74,7 @@ namespace ForestTaxator.Lib.Model
         {
             Points.AddRange(points);
             BoundingBoxDeprecated = true;
-            CenterPoint = new Point();
+            CenterPoint = null;
         }
 
         public void RecalculateBoundingBox()

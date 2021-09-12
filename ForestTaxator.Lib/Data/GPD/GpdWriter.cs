@@ -15,12 +15,12 @@ namespace ForestTaxator.Lib.Data.GPD
         private uint _pointCounter;
         public int SliceId { get; set; }
 
-        public GpdWriter(string filePath, string[] fields, float sliceHeight)
+        public GpdWriter(string filePath, string[] fields, double sliceHeight)
         {
             _header = new GpdHeader
             {
                 Version = GpdHeader.EVersion.V1,
-                Slice = sliceHeight,
+                Slice = (float)sliceHeight,
                 Fields = fields ?? new[] {"x", "y", "z", "intensity"},
                 Format = GpdHeader.EFormat.GPD,
                 Size = new[] {GpdHeader.ESize.Double, GpdHeader.ESize.Double, GpdHeader.ESize.Double, GpdHeader.ESize.Double},
@@ -29,6 +29,7 @@ namespace ForestTaxator.Lib.Data.GPD
             };
             try
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
                 var fileStream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                 var bufferedStream = new BufferedStream(fileStream, 4096);
                 _binaryWriter = new BinaryWriter(bufferedStream);
@@ -88,13 +89,14 @@ namespace ForestTaxator.Lib.Data.GPD
             WritePointSet(pointSet, SliceId);
         }
 
-        public void WritePointSet(PointSet pointSet, int sliceId)
+        public void WritePointSet(PointSet pointSet, int sliceId, string comment = null)
         {
             var groupMeta = new GpdGroupMeta
             {
                 Points = pointSet.Count,
                 Slice = sliceId,
-                Id = _groupId++
+                Id = _groupId++,
+                Comment = comment
             };
             WriteGroupMeta(groupMeta);
             foreach (var point in pointSet)
@@ -122,7 +124,6 @@ namespace ForestTaxator.Lib.Data.GPD
             {
                 WritePointSetGroup(slice, SliceId++);                
             }
-            
         }
     }
 }

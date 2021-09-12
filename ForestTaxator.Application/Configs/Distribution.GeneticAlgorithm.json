@@ -307,7 +307,7 @@
                 {
                   "Name": "ticks",
                   "Type": "System.Int64",
-                  "Value": 3000
+                  "Value": 3000000
                 }
               ],
               "GenericParameters": []
@@ -322,7 +322,7 @@
             {
               "Name": "MaximumSimilarity",
               "Type": "System.Double",
-              "Value": 0.8999999761581421
+              "Value": 0.90
             }
           ],
           "GenericParameters": []
@@ -334,7 +334,7 @@
             {
               "Name": "SufficientResult",
               "Type": "System.Double",
-              "Value": 0.00009999999747378752
+              "Value": 0.0099
             }
           ],
           "GenericParameters": [

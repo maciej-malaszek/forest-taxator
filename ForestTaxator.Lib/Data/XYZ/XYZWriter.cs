@@ -19,6 +19,7 @@ namespace ForestTaxator.Lib.Data.XYZ
             try
             {
                 _fileInfo = new FileInfo(filePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
                 _fileStream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                 _bufferedStream = new BufferedStream(_fileStream, 4096);
                 _streamWriter = new StreamWriter(_bufferedStream, Encoding.ASCII);

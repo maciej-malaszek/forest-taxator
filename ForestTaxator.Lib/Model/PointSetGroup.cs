@@ -16,7 +16,7 @@ namespace ForestTaxator.Lib.Model
 
         public PointSetGroup(IList<PointSet> pointSets)
         {
-            PointSets = pointSets.Where(p => p is {Empty: false}).ToList();
+            PointSets = pointSets.Where(p => p is { Empty: false }).ToList();
         }
 
         public PointSetGroup Filter(params IPointSetFilter[] filters)
@@ -25,7 +25,11 @@ namespace ForestTaxator.Lib.Model
             {
                 return null;
             }
-            var pointSets = filters.Aggregate(PointSets, (current, filter) => filter.Filter(current));
+
+            var pointSets = filters
+                .Aggregate(PointSets, (current, filter) => filter.Filter(current))
+                .Where(p => p.Count > 0)
+                .ToList();
             return new PointSetGroup(pointSets);
         }
 
@@ -64,12 +68,12 @@ namespace ForestTaxator.Lib.Model
 
                         if (t == null)
                         {
-                            t = new Tree.Node(pointSet) {Tree = node.Tree};
+                            t = new Tree.Node(pointSet) { Tree = node.Tree };
                             node.Tree.SetRoot(t);
                         }
                         else
                         {
-                            var newNode = new Tree.Node(pointSet) {Tree = t.Tree};
+                            var newNode = new Tree.Node(pointSet) { Tree = t.Tree };
                             var children = t.Children.Where(x => x.Center.Z > pointSet.Center.Z).ToArray();
                             foreach (var child in children)
                             {
@@ -80,6 +84,7 @@ namespace ForestTaxator.Lib.Model
                         }
                     }
                 }
+
                 ProgressTracker.Progress(EProgressStage.TreeBuilding, "Building Trees", index++, PointSets.Count);
             }
 

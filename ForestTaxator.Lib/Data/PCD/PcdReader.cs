@@ -152,9 +152,13 @@ namespace ForestTaxator.Lib.Data.PCD
             for (ulong i = 0; i < Header.Points; i++)
             {
                 points[i] = ReadPoint();
+                if (points[i] is null)
+                {
+                    break;
+                }
             }
 
-            return new PointSet(points);
+            return points[0] is null ? null : new PointSet(points);
         }
 
         public IEnumerable<PointSlice> ReadPointSlices(float sliceHeight = 0.1f)

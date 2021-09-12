@@ -1,6 +1,6 @@
 using System;
 
-namespace ForestTaxator.TestApp.Commands.Attributes
+namespace ForestTaxator.Application.Commands.Attributes
 {
     public class OptionRequiredIfFlaggedAttribute : Attribute
     {

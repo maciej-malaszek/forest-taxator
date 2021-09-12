@@ -19,13 +19,13 @@ namespace ForestTaxator.Lib.Algorithms
             _eccentricityThreshold = eccentricityThreshold;
             _fitnessThreshold = fitnessThreshold;
         }
-        public Tree ApproximateTree(Tree tree, Terrain terrain, double? treeHeight = null, float sliceHeight = 0.1f)
+        public Tree ApproximateTree(Tree tree, double? treeHeight = null, float sliceHeight = 0.1f)
         {
             var nodes = tree.GetAllNodesAsVector();
             var population = _geneticEllipseMatch.GeneticAlgorithm.Population;
             ApproximateGenetically(nodes, population);
 
-            var terrainHeight = terrain.GetHeight(tree.Root.Center);
+        //    var terrainHeight = terrain.GetHeight(tree.Root.Center);
             
             //tree.RegressMissingLevels(terrainHeight, treeHeight ?? tree.GetHighestNode().Center.Z, sliceHeight);
             //

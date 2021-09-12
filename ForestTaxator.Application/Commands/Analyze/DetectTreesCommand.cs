@@ -1,36 +1,33 @@
 using CommandLine;
-using ForestTaxator.TestApp.Commands.Attributes;
+using ForestTaxator.Application.Commands.Attributes;
 
-namespace ForestTaxator.TestApp.Commands.Analyze
+namespace ForestTaxator.Application.Commands.Analyze
 {
     [Verb("detect-trees")]
     public class DetectTreesCommand
     {
         [Value(0)]
-        public string InputPath { get; set; }
+        public string Input { get; set; }
 
         [Option("raw", HelpText = "process files as raw cloud points")]
         public bool Raw { get; set; }
 
         [Option('c', "filters-configuration")]
         [OptionRequiredIfFlagged("Raw")]
-        public string FiltersConfigurationPath { get; set; }
+        public string FiltersConfigurationFile { get; set; }
 
         [Option('h', "slice-height")]
         [OptionRequiredIfFlagged("Raw")]
         public double? SliceHeight { get; set; }
 
-        [Option('f', "format")]
+        [Option('r', "resolution", Default = 2.5)]
         [OptionRequiredIfFlagged("Raw")]
-        public string Format { get; set; }
-
-        [Option('t', "terrain", Required = true)]
-        public string TerrainPath { get; set; }
+        public double Resolution { get; set; }
 
         [Option('o', "output-directory", Required = true)]
         public string OutputDirectory { get; set; }
-
-        [Option("output-format", Default = "gpd")]
-        public string OutputFormat { get; set; }
+        
+        [Option("export-preview", HelpText = "export point clouds in XYZ for previewing purpose")]
+        public bool ExportPreview { get; set; }
     }
 }

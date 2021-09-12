@@ -1,6 +1,6 @@
-using ForestTaxator.TestApp.Utils;
+using ForestTaxator.Application.Utils;
 
-namespace ForestTaxator.TestApp.Models
+namespace ForestTaxator.Application.Models
 {
     public class LargeGroupsFilterConfiguration
     {

@@ -70,6 +70,10 @@ namespace ForestTaxator.Lib.Filters
             }
 
             var bestPossibleParameters = FindBestParameters(pointSet);
+            if (bestPossibleParameters is null)
+            {
+                return false;
+            }
             var fitness = _fitnessFunction.GetValue(bestPossibleParameters.Phenotype);
 
             var isTrunk = fitness <= GetTrunkThreshold(pointSet.Center.Z);

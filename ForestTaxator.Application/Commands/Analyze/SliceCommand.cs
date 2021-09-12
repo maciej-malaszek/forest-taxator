@@ -1,6 +1,6 @@
 using CommandLine;
 
-namespace ForestTaxator.TestApp.Commands.Analyze
+namespace ForestTaxator.Application.Commands.Analyze
 {
     [Verb("slice")]
     public class SliceCommand
@@ -10,6 +10,9 @@ namespace ForestTaxator.TestApp.Commands.Analyze
         
         [Option('h', "slice-height", Default = 0.1)]
         public double SliceHeight { get; set; }
+        
+        [Option('t', "terrain", Required = true)]
+        public string TerrainPath { get; set; }
         
         [Option('o', "output", Required = true)]
         public string Output { get; set; }

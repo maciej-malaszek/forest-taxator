@@ -21,6 +21,8 @@ namespace ForestTaxator.Lib.Algorithms
                 return null;
             }
 
+            EllipsisMatchFitness.BufferWidth = BufferWidth;
+            EllipsisMatchFitness.EccentricityThreshold = EccentricityThreshold;
             EllipsisMatchFitness.AnalyzedPointSet = group;
 
             ReinitializePopulation(initializer);

@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ForestTaxator.Application.Commands.Analyze;
+using ForestTaxator.Application.Models;
+using ForestTaxator.Application.Utils;
 using ForestTaxator.Lib.Algorithms;
 using ForestTaxator.Lib.Data.GPD;
 using ForestTaxator.Lib.Filters;
 using ForestTaxator.Lib.Fitness;
 using ForestTaxator.Lib.Model;
 using ForestTaxator.Lib.Utils;
-using ForestTaxator.TestApp.Commands.Analyze;
-using ForestTaxator.TestApp.Models;
-using ForestTaxator.TestApp.Utils;
 using GeneticToolkit;
 using GeneticToolkit.Comparisons;
 using GeneticToolkit.Factories;
@@ -22,7 +22,7 @@ using GeneticToolkit.Utils.Configuration;
 using Newtonsoft.Json;
 using Serilog;
 
-namespace ForestTaxator.TestApp.Flows
+namespace ForestTaxator.Application.Flows
 {
     public class FilteringFlow
     {
@@ -88,9 +88,9 @@ namespace ForestTaxator.TestApp.Flows
             return geneticDistributionFilter;
         }
 
-        private static IEnumerable<IPointSetFilter> ParsePointSetFilters(FilterCommand command, ILogger logger)
+        private static IEnumerable<IPointSetFilter> ParsePointSetFilters(string filtersConfigurationFile, ILogger logger)
         {
-            var configurationFileContent = File.ReadAllText(command.FiltersConfigurationFile);
+            var configurationFileContent = File.ReadAllText(filtersConfigurationFile);
             var filtersConfiguration = JsonConvert.DeserializeObject<FiltersConfiguration>(configurationFileContent);
             if (filtersConfiguration == null)
             {
@@ -153,6 +153,32 @@ namespace ForestTaxator.TestApp.Flows
             return filters.OrderBy(filter => filter.Key).Select(filter => filter.Value);
         }
 
+
+        public static List<PointSetGroup> GetFilteredPointSetGroups(string filtersConfigurationFile, ILogger logger, List<PointSlice> slices)
+        {
+            var filters = ParsePointSetFilters(filtersConfigurationFile, logger).ToArray();
+            var detectionParameters = new DetectionParameters
+            {
+                PointSetFilters = filters,
+                MeshWidth = 0.15f
+            };
+            
+            logger?.Information("Starting point grouping...");
+            var groups = slices.Select(slice =>
+                    slice?.GroupByDistance(detectionParameters.MeshWidth, detectionParameters.MinimalPointsPerMesh)
+                )
+                .Where(slice => slice != null)
+                .ToList();
+            logger?.Information("Points grouped...");
+            logger?.Information("Starting filtering...");
+            var pointSetGroups = groups.Select((group, index) =>
+            {
+                ProgressTracker.Progress(EProgressStage.NoiseFiltering, "Filtering Noise", index, groups.Count);
+                return @group.Filter(detectionParameters.PointSetFilters);
+            }).Where(x => x != null).ToList();
+            return pointSetGroups;
+        }
+        
         public static Task Execute(FilterCommand command, ILogger logger)
         {
             if (File.Exists(command.Input) == false)
@@ -166,30 +192,15 @@ namespace ForestTaxator.TestApp.Flows
                 logger.Fatal("Configuration file does not exist!");
                 Environment.Exit(0);
             }
-
-            var filters = ParsePointSetFilters(command, logger).ToArray();
-            var detectionParameters = new DetectionParameters
-            {
-                PointSetFilters = filters,
-            };
-
+            
             using var reader = new GpdReader(command.Input);
-            var slices = reader.ReadPointSlices();
-
-            logger?.Information("Starting point grouping...");
-            var groups = slices.Select(slice =>
-                slice?.GroupByDistance(detectionParameters.MeshWidth, detectionParameters.MinimalPointsPerMesh)
-            )
-                .Where(slice => slice != null)
-                .ToList();
-            logger?.Information("Points grouped...");
-            logger?.Information("Starting filtering...");
-            var pointSetGroups = groups.Select((group, index) =>
+            var slices = reader.ReadPointSlices().Where(s=> s != null).ToList();
+            foreach (var slice in slices)
             {
-                ProgressTracker.Progress(EProgressStage.NoiseFiltering, "Filtering Noise", index, groups.Count);
-                return @group.Filter(detectionParameters.PointSetFilters);
-            }).Where(x => x != null).ToList();
-
+                slice.PointSets = slice.PointSets.Where(p => p is { Empty: false }).ToList();
+            }
+            var pointSetGroups = GetFilteredPointSetGroups(command.FiltersConfigurationFile, logger, slices);
+            
             if (command.Merge)
             {
                 using var writer = new GpdWriter(Path.Join(command.Output,"Filtered.gpd"), null, reader.Header.Slice);

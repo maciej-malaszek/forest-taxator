@@ -42,10 +42,7 @@ namespace ForestTaxator.Lib.Model
                 return false;
             }
 
-            if (PointSets[x, y] == null)
-            {
-                PointSets[x, y] = new PointSet();
-            }
+            PointSets[x, y] ??= new PointSet();
 
             PointSets[x, y].Add(point);
 

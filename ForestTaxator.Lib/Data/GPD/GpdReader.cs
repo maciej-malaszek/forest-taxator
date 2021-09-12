@@ -39,7 +39,7 @@ namespace ForestTaxator.Lib.Data.GPD
             _fileStream.Seek(Header.HeaderBytes, SeekOrigin.Begin);
         }
 
-        public GpdGroupMeta ReadMetaData()
+        private GpdGroupMeta ReadMetaData()
         {
             var stringBuilder = new StringBuilder();
             // Meta is ASCII encoded string, so we can read it as chars
@@ -98,6 +98,26 @@ namespace ForestTaxator.Lib.Data.GPD
 
             _pointId++;
             return p;
+        }
+        
+        public PointSet ReadPointSet(out GpdGroupMeta metaData)
+        {
+            if (_pointGroupId >= Header.Groups)
+            {
+                metaData = null;
+                return null;
+            }
+
+            metaData = ReadMetaData();
+            var pointSet = new PointSet((int) metaData.Points);
+            while (_pointId < metaData.Points)
+            {
+                pointSet.Points.Add(ReadPoint());
+            }
+
+            _pointGroupId++;
+
+            return pointSet;
         }
 
         public PointSet ReadPointSet()

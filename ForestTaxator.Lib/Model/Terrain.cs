@@ -47,7 +47,7 @@ namespace ForestTaxator.Lib.Model
         public double GetHeight(Point point)
         {
             var key = GetKey(point);
-            return _heightMap[key];
+            return _heightMap.ContainsKey(key) ? _heightMap[key] : 0;
         }
 
         private Tuple<int, int> GetKey(Point point)

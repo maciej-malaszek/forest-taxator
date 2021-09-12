@@ -48,17 +48,17 @@ namespace ForestTaxator.Lib.Data.XYZ
         public PointSet ReadPointSet()
         {
             var pointSet = new PointSet();
-            CloudPoint p;
             do
             {
-                p = ReadPoint();
-                if (p != null)
+                var p = ReadPoint();
+                if (p is null)
                 {
-                    pointSet.Add(p);
+                    break;
                 }
-            } while (p != null);
+                pointSet.Add(p);
+            } while (true);
 
-            return pointSet;
+            return pointSet[0] is null ? null : pointSet;
         }
 
         public IEnumerable<PointSlice> ReadPointSlices(float sliceHeight)

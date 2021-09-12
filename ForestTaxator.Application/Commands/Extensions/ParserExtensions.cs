@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CommandLine;
-using ForestTaxator.TestApp.Commands.Attributes;
+using ForestTaxator.Application.Commands.Attributes;
 
-namespace ForestTaxator.TestApp.Commands.Extensions
+namespace ForestTaxator.Application.Commands.Extensions
 {
     public static class ParserExtensions
     {

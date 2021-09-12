@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using ForestTaxator.TestApp.Utils;
+using ForestTaxator.Application.Utils;
 using GeneticToolkit.Genotypes.Collective;
 using GeneticToolkit.Phenotypes.Collective;
 using NUnit.Framework;

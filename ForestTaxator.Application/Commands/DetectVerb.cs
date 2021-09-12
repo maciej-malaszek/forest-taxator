@@ -1,6 +1,6 @@
 using CommandLine;
 
-namespace ForestTaxator.TestApp.Commands
+namespace ForestTaxator.Application.Commands
 {
     [Verb("detect")]
     public class DetectVerb

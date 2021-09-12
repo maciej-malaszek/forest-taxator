@@ -10,7 +10,7 @@ namespace ForestTaxator.Lib.Fitness
     public class EllipsisMatchFitness : IFitnessFunctionFactory
     {
         private static readonly IFitnessFunction _fitnessFunction = new FitnessFunction(Fitness);
-        public static PointSet AnalyzedPointSet;
+        public static PointSet AnalyzedPointSet { get; set; }
         public static double EccentricityThreshold { get; set; }
         public static double BufferWidth { get; set; }
         public static double Fitness(IPhenotype p)

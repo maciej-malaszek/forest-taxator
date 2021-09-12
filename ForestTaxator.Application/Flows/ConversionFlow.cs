@@ -2,11 +2,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ForestTaxator.Application.Commands;
 using ForestTaxator.Lib.Data;
-using ForestTaxator.TestApp.Commands;
 using Serilog;
 
-namespace ForestTaxator.TestApp.Flows
+namespace ForestTaxator.Application.Flows
 {
     public static class ConversionFlow
     {
@@ -25,7 +25,13 @@ namespace ForestTaxator.TestApp.Flows
                 command.OutputFormat
             );
 
-            writer.WritePointSet(reader.ReadPointSet());
+            var ps = reader.ReadPointSet();
+            while (ps != null)
+            {
+                writer.WritePointSet(ps);
+                ps = reader.ReadPointSet();
+            }
+            
             return Task.CompletedTask;
         }
     }

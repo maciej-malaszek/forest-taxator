@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ForestTaxator.TestApp.Utils
+namespace ForestTaxator.Application.Utils
 {
     public class ExpressionDefinition
     {
