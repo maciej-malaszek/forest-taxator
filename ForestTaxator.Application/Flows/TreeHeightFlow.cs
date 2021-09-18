@@ -8,9 +8,9 @@ using Serilog;
 
 namespace ForestTaxator.Application.Flows
 {
-    public static class TerrainFlow
+    public static class TreeHeightFlow
     {
-        public static Task Execute(TerrainCommand command, ILogger logger)
+        public static Task Execute(TreeHeightCommand command, ILogger logger)
         {
             if (File.Exists(command.Input) == false)
             {
@@ -26,8 +26,8 @@ namespace ForestTaxator.Application.Flows
             }
             
             var cloud = new Cloud(streamReader);
-            var terrain = new Terrain(cloud, command.Resolution, command.MaxHeight);
-            terrain.Export(command.Output);
+            var treeHeightMap = new TreeHeightMap(cloud, command.Resolution, command.MaxHeight);
+            treeHeightMap.Export(command.Output);
 
             return Task.CompletedTask;
             

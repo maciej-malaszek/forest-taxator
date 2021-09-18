@@ -20,7 +20,7 @@ namespace ForestTaxator.Lib.Data.XYZ
             {
                 _fileInfo = new FileInfo(filePath);
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-                _fileStream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                _fileStream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite);
                 _bufferedStream = new BufferedStream(_fileStream, 4096);
                 _streamWriter = new StreamWriter(_bufferedStream, Encoding.ASCII);
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;

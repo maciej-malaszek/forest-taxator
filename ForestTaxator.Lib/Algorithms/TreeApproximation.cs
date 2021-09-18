@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using ForestTaxator.Lib.Extensions;
 using ForestTaxator.Lib.Model;
 using ForestTaxator.Lib.Utils;
 using GeneticToolkit.Interfaces;
@@ -19,22 +21,41 @@ namespace ForestTaxator.Lib.Algorithms
             _eccentricityThreshold = eccentricityThreshold;
             _fitnessThreshold = fitnessThreshold;
         }
-        public Tree ApproximateTree(Tree tree, double? treeHeight = null, float sliceHeight = 0.1f)
+
+        public Tree ApproximateTree(Tree tree, double treeHeight = 0, float sliceHeight = 0.1f, bool smooth = false)
         {
+            if (tree is null)
+            {
+                return null;
+            }
+
             var nodes = tree.GetAllNodesAsVector();
             var population = _geneticEllipseMatch.GeneticAlgorithm.Population;
             ApproximateGenetically(nodes, population);
 
-        //    var terrainHeight = terrain.GetHeight(tree.Root.Center);
-            
-            //tree.RegressMissingLevels(terrainHeight, treeHeight ?? tree.GetHighestNode().Center.Z, sliceHeight);
-            //
-            // nodes = tree.GetAllNodesAsVector();
-            // foreach (var node in nodes)
-            // {
-            //     // node.Ellipse.SetFirstFocal(MathUtils.EDimension.Z, (int)(10 * (node.Ellipse.FirstFocal.Z + terrainHeight)) / 10.0f);
-            //     // node.Ellipse.SetSecondFocal(MathUtils.EDimension.Z, (int)(10 * (node.Ellipse.SecondFocal.Z + terrainHeight)) / 10.0f);
-            // }
+            var ellipses = nodes.Select(n => n.Ellipse).ToArray();
+            var correctEllipses = ellipses.Select(e => e != null && double.IsNaN(e.MajorRadius) == false).ToArray();
+            if (correctEllipses.Length == 0 || (float)correctEllipses.Length / ellipses.Length < 0.25)
+            {
+                return null;
+            }
+
+            var height = treeHeight == 0 ? tree.GetHighestNode().Center.Z : treeHeight;
+            foreach (var node in nodes)
+            {
+                node.Center.Z = (float)Math.Round(node.Center.Z, 1, MidpointRounding.ToEven);
+
+                if (node.Ellipse is null)
+                {
+                    continue;
+                }
+
+                node.Ellipse.SetFirstFocal(MathUtils.EDimension.Z, (float)node.Center.Z);
+                node.Ellipse.SetSecondFocal(MathUtils.EDimension.Z,  (float)node.Center.Z);
+            }
+
+            //terrain height was compensated during slicing step
+            tree.RegressMissingLevels(0, height, sliceHeight, smooth);
 
             return tree;
         }
@@ -48,7 +69,7 @@ namespace ForestTaxator.Lib.Algorithms
             {
                 var individual = _geneticEllipseMatch.FindBestIndividual(node.PointSet, node.Parent?.Ellipse);
                 var fitness = population.FitnessFunction.GetValue(individual);
-                var ellipticParameters = ((CollectivePhenotype<EllipticParameters>) individual.Phenotype).GetValue();
+                var ellipticParameters = ((CollectivePhenotype<EllipticParameters>)individual.Phenotype).GetValue();
                 var ellipse = new Ellipsis(ellipticParameters, node.PointSet.Center.Z)
                 {
                     Intensity = fitness
@@ -63,6 +84,7 @@ namespace ForestTaxator.Lib.Algorithms
                 {
                     node.Ellipse = ellipse;
                 }
+
                 ProgressTracker.Progress(EProgressStage.TreeApproximation, "Approximating Tree segments", index++, count);
             }
         }

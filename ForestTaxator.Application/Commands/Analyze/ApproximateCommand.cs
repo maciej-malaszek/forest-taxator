@@ -16,6 +16,14 @@ namespace ForestTaxator.Application.Commands.Analyze
 
         [Option("export-preview", HelpText = "export point clouds in XYZ for previewing purpose")]
         public bool ExportPreview { get; set; }
+
+        [Option('h', "node-height", Default = 0.1)]
+        public double NodeHeight { get; set; }
         
+        [Option('t', "tree-heightmap", Required = true)]
+        public string TreeHeightMapPath { get; set; }
+        
+        [Option("smooth", Default = false, HelpText = "Smooth tree using regression on all nodes. It replaces ellipses with circles")]
+        public bool Smooth { get; set; }
     }
 }

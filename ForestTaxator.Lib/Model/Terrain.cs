@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace ForestTaxator.Lib.Model
-{ 
-    public class Terrain
+{
+    public class Terrain : HeightMap
     {
-        public double MeshSize { get; private set; }
-
-        private readonly Dictionary<Tuple<int, int>, double> _heightMap;
-
-
         // FORESTTAXATORTERRAIN
         private static readonly byte[] _magicNumbers =
         {
@@ -21,15 +14,13 @@ namespace ForestTaxator.Lib.Model
 
         private Terrain()
         {
-            _heightMap = new Dictionary<Tuple<int, int>, double>();
         }
-
 
         public Terrain(PointSet cloud, double meshSize = 2.5, double maxTerrainHeight = 1)
         {
             MeshSize = meshSize;
-            _heightMap = new Dictionary<Tuple<int, int>, double>();
-            
+            HeightMapDictionary = new Dictionary<Tuple<int, int>, double>();
+
             foreach (var cloudPoint in cloud)
             {
                 var key = GetKey(cloudPoint);
@@ -37,64 +28,23 @@ namespace ForestTaxator.Lib.Model
                 {
                     continue;
                 }
-                if (!_heightMap.ContainsKey(key) || _heightMap[key] > cloudPoint.Z)
+
+                if (!HeightMapDictionary.ContainsKey(key) || HeightMapDictionary[key] > cloudPoint.Z)
                 {
-                    _heightMap[key] = cloudPoint.Z;
+                    HeightMapDictionary[key] = cloudPoint.Z;
                 }
             }
         }
 
-        public double GetHeight(Point point)
-        {
-            var key = GetKey(point);
-            return _heightMap.ContainsKey(key) ? _heightMap[key] : 0;
-        }
-
-        private Tuple<int, int> GetKey(Point point)
-        {
-            var x = (int)(point.X / MeshSize);
-            var y = (int)(point.Y / MeshSize);
-            return new Tuple<int, int>(x, y);
-        }
-
         public void Export(string file)
         {
-            using var fileStream = new FileStream(file, FileMode.OpenOrCreate, FileAccess.Write);
-            using var binaryWriter = new BinaryWriter(fileStream);
-            
-            binaryWriter.Write(_magicNumbers);
-            binaryWriter.Write(MeshSize);
-            binaryWriter.Write(_heightMap.Keys.Count);
-            foreach (var key in _heightMap.Keys)
-            {
-                binaryWriter.Write(key.Item1);
-                binaryWriter.Write(key.Item2);
-                binaryWriter.Write(_heightMap[key]);
-            }
-            binaryWriter.Flush();
+           Export(file, _magicNumbers);
         }
 
         public static Terrain Import(string file)
         {
-            using var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
-            using var binaryReader = new BinaryReader(fileStream);
-
-            var bytes = binaryReader.ReadBytes(_magicNumbers.Length);
-            if (bytes.SequenceEqual(_magicNumbers) == false)
-            {
-                return null;
-            }
-
             var terrain = new Terrain();
-            terrain.MeshSize = binaryReader.ReadDouble();
-            var entriesCount = binaryReader.ReadInt32();
-            for (var i = 0; i < entriesCount; i++)
-            {
-                var key = new Tuple<int, int>(binaryReader.ReadInt32(), binaryReader.ReadInt32());
-                terrain._heightMap[key] = binaryReader.ReadDouble();
-            }
-
-            return terrain;
+            return terrain.Import(file, _magicNumbers) ? terrain : null;
         }
     }
 }

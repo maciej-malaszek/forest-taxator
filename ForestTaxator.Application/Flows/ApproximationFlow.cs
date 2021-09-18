@@ -99,6 +99,14 @@ namespace ForestTaxator.Application.Flows
                 Environment.Exit(0);
             }
 
+            if (File.Exists(command.TreeHeightMapPath) == false)
+            {
+                logger.Fatal("Tree heightmap file does not exist!");
+                Environment.Exit(0);
+            }
+
+            var treeHeightMap = TreeHeightMap.Import(command.TreeHeightMapPath);
+
             var configurationFileContent = File.ReadAllText(command.ConfigurationFile);
             var configuration = JsonConvert.DeserializeObject<ApproximationConfiguration>(configurationFileContent);
             if (configuration == null)
@@ -107,14 +115,29 @@ namespace ForestTaxator.Application.Flows
                 Environment.Exit(0);
             }
 
+
             var geneticEllipseMatch = PrepareGeneticEllipseMatchAlgorithm(configuration.EllipsisMatchConfiguration, logger);
-            var approximation = new TreeApproximation(geneticEllipseMatch, 0.8, 0.01f);
+            var approximation =
+                new TreeApproximation(geneticEllipseMatch, configuration.EccentricityThreshold, configuration.FitnessThreshold);
             var trees = ParseTrees(inputFiles);
 
             var treeId = 0;
             foreach (var detectedTree in trees)
             {
-                var tree = approximation.ApproximateTree(detectedTree);
+                if (detectedTree is null)
+                {
+                    continue;
+                }
+                var tree = approximation.ApproximateTree(detectedTree, 
+                    treeHeightMap.GetHeight(detectedTree.Root.Center), 
+                    (float)command.NodeHeight,
+                    command.Smooth
+                );
+                if (tree is null)
+                {
+                    logger.Error("Provided configuration was too restrictive. Could not find sufficient approximations.");
+                    Environment.Exit(0);
+                }
                 if (command.ExportPreview)
                 {
                     ExportPreview(command, tree, $"T{treeId}.e.xyz");

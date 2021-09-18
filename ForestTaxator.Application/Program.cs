@@ -18,7 +18,7 @@ namespace ForestTaxator.Application
     {
         private static HierarchicalProgress _consoleProgressBar;
         private static ILogger _logger;
-        
+
         private static void Report(string status, double step, double total)
         {
             _consoleProgressBar.Report(step / total, status);
@@ -26,11 +26,11 @@ namespace ForestTaxator.Application
 
         private static void PrepareProgressTracker()
         {
-            ProgressTracker.Actions[EProgressStage.Slicing] = new Action<string, double, double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.NoiseFiltering] = new Action<string, double, double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.TreeApproximation] = new Action<string, double, double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.FakeTreesFiltering] = new Action<string, double, double>[] {Report};
-            ProgressTracker.Actions[EProgressStage.TreeBuilding] = new Action<string, double, double>[] {Report};
+            ProgressTracker.Actions[EProgressStage.Slicing] = new Action<string, double, double>[] { Report };
+            ProgressTracker.Actions[EProgressStage.NoiseFiltering] = new Action<string, double, double>[] { Report };
+            ProgressTracker.Actions[EProgressStage.TreeApproximation] = new Action<string, double, double>[] { Report };
+            ProgressTracker.Actions[EProgressStage.FakeTreesFiltering] = new Action<string, double, double>[] { Report };
+            ProgressTracker.Actions[EProgressStage.TreeBuilding] = new Action<string, double, double>[] { Report };
         }
 
         static void Main(string[] args)
@@ -48,16 +48,19 @@ namespace ForestTaxator.Application
             PrepareProgressTracker();
 
             var parsed = Parser.Default.ParseSetArguments<AnalyzeVerbSet, ConvertVerb>(args, OnVerbSetParsed);
-            parsed.MapResult<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand, ConvertVerb, Task>
-            (
-                approximateCommand => Parser.Default.ExecuteMapping(approximateCommand, cmd => ApproximationFlow.Execute(cmd, _logger)),
-                detectTreesCommand => Parser.Default.ExecuteMapping(detectTreesCommand, cmd => DetectionFlow.Execute(cmd, _logger)),
-                filterCommand => Parser.Default.ExecuteMapping(filterCommand, cmd => FilteringFlow.Execute(cmd, _logger)),
-                sliceCommand => Parser.Default.ExecuteMapping(sliceCommand, cmd => SlicingFlow.Execute(cmd, _logger)),
-                terrainCommand => Parser.Default.ExecuteMapping(terrainCommand, cmd => TerrainFlow.Execute(cmd, _logger)),
-                convertCommand => Parser.Default.ExecuteMapping(convertCommand, cmd => ConversionFlow.Execute(cmd, _logger)),
-                _ => Task.CompletedTask
-            );
+            parsed
+                .MapResult<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand, TreeHeightCommand, ConvertVerb,
+                    Task>
+                (
+                    approximateCommand => Parser.Default.ExecuteMapping(approximateCommand, cmd => ApproximationFlow.Execute(cmd, _logger)),
+                    detectTreesCommand => Parser.Default.ExecuteMapping(detectTreesCommand, cmd => DetectionFlow.Execute(cmd, _logger)),
+                    filterCommand => Parser.Default.ExecuteMapping(filterCommand, cmd => FilteringFlow.Execute(cmd, _logger)),
+                    sliceCommand => Parser.Default.ExecuteMapping(sliceCommand, cmd => SlicingFlow.Execute(cmd, _logger)),
+                    terrainCommand => Parser.Default.ExecuteMapping(terrainCommand, cmd => TerrainFlow.Execute(cmd, _logger)),
+                    treeHeightCommand => Parser.Default.ExecuteMapping(treeHeightCommand, cmd => TreeHeightFlow.Execute(cmd, _logger)),
+                    convertCommand => Parser.Default.ExecuteMapping(convertCommand, cmd => ConversionFlow.Execute(cmd, _logger)),
+                    _ => Task.CompletedTask
+                );
             _consoleProgressBar.Dispose();
         }
 
@@ -65,257 +68,9 @@ namespace ForestTaxator.Application
             Parsed<object> parsed, IEnumerable<string> argsToParse, bool containedHelpOrVersion)
         {
             return parsed.MapResult(
-                (AnalyzeVerbSet _) => parser.ParseArguments<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand>(argsToParse),
+                (AnalyzeVerbSet _) =>
+                    parser.ParseArguments<ApproximateCommand, DetectTreesCommand, FilterCommand, SliceCommand, TerrainCommand, TreeHeightCommand>(argsToParse),
                 _ => parsed);
         }
-
-        // private static GeneticEllipseMatch PrepareGeneticEllipseMatchAlgorithm()
-        // {
-        //     var geneticEllipseMatch = new GeneticEllipseMatch
-        //     {
-        //         BufferWidth = 0.002,
-        //         EccentricityThreshold = 0.85,
-        //     };
-        //     var fitnessFunction = geneticEllipseMatch.GetFitnessFunction();
-        //     var factory = new CollectivePhenotypeFactory<EllipticParameters>();
-        //     var individualFactory =
-        //         new IndividualFactory<CollectiveGenotype<EllipticParameters>, CollectivePhenotype<EllipticParameters>>(factory,
-        //             fitnessFunction);
-        //     var compareCriteria = new SimpleComparison(fitnessFunction, EOptimizationMode.Minimize);
-        //     var geneticAlgorithm = new GeneticAlgorithm
-        //     {
-        //         StopConditions = new IStopCondition[]
-        //         {
-        //             new TimeSpanCondition(TimeSpan.FromSeconds(25f)),
-        //             new PopulationDegradation(0.9f),
-        //             new SufficientIndividual(fitnessFunction, 0.0001f)
-        //         },
-        //         StopConditionMode = EStopConditionMode.Any,
-        //         Population = new Population(fitnessFunction, 30)
-        //         {
-        //             CompareCriteria = compareCriteria,
-        //             Crossover = new SinglePointCrossover(),
-        //             HeavenPolicy = new OneGod(),
-        //             Mutation = new ArithmeticMutation(new[]
-        //                 {
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10)
-        //                 },
-        //                 new[]
-        //                 {
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte
-        //                 }
-        //             ),
-        //             MutationPolicy = new HesserMannerMutation(1, 1, 0.1f),
-        //             ResizePolicy = new ConstantResizePolicy(),
-        //             IndividualFactory = individualFactory,
-        //             IncompatibilityPolicy = new AllowAll(),
-        //             SelectionMethod = new Tournament(compareCriteria, 0.01f),
-        //             StatisticUtilities = new Dictionary<string, IStatisticUtility>()
-        //         }
-        //     };
-        //     geneticEllipseMatch.GeneticAlgorithm = geneticAlgorithm;
-        //
-        //     return geneticEllipseMatch;
-        // }
-
-        // private static EllipsisMatchFilter PrepareEllipsisMatchFilter()
-        // {
-        //     var filter = new EllipsisMatchFilter
-        //     {
-        //         FitnessThreshold = 0.1,
-        //         EccentricityThreshold = 0.80,
-        //         GeneticEllipseMatch = new GeneticEllipseMatch
-        //         {
-        //             BufferWidth = 0.01,
-        //             EccentricityThreshold = 0.85,
-        //         }
-        //     };
-        //     var fitnessFunction = filter.GeneticEllipseMatch.GetFitnessFunction();
-        //
-        //     var factory = new CollectivePhenotypeFactory<EllipticParameters>();
-        //     var individualFactory =
-        //         new IndividualFactory<CollectiveGenotype<EllipticParameters>, CollectivePhenotype<EllipticParameters>>(factory,
-        //             fitnessFunction);
-        //     var compareCriteria = new SimpleComparison(fitnessFunction, EOptimizationMode.Minimize);
-        //     var geneticAlgorithm = new GeneticAlgorithm
-        //     {
-        //         StopConditions = new IStopCondition[]
-        //         {
-        //             new TimeSpanCondition(TimeSpan.FromSeconds(0.3f)),
-        //             new PopulationDegradation(0.9f),
-        //             new SufficientIndividual(fitnessFunction, filter.FitnessThreshold - 0.001f)
-        //         },
-        //         StopConditionMode = EStopConditionMode.Any,
-        //         Population = new Population(fitnessFunction, 60)
-        //         {
-        //             CompareCriteria = compareCriteria,
-        //             Crossover = new SinglePointCrossover(),
-        //             HeavenPolicy = new OneGod(),
-        //             Mutation = new ArithmeticMutation(new[]
-        //                 {
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10)
-        //                 },
-        //                 new[]
-        //                 {
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte
-        //                 }
-        //             ),
-        //             MutationPolicy = new HesserMannerMutation(1, 1, 0.1f),
-        //             ResizePolicy = new ConstantResizePolicy(),
-        //             IndividualFactory = individualFactory,
-        //             IncompatibilityPolicy = new AllowAll(),
-        //             SelectionMethod = new Tournament(compareCriteria, 0.01f),
-        //             StatisticUtilities = new Dictionary<string, IStatisticUtility>()
-        //         }
-        //     };
-        //
-        //     filter.GeneticEllipseMatch.GeneticAlgorithm = geneticAlgorithm;
-        //     return filter;
-        // }
-        //
-        // private static GeneticDistributionFilter PrepareGeneticDistributionFilter(float threshold = 0.22f)
-        // {
-        //     var geneticDistributionFilter = new GeneticDistributionFilter(new GeneticDistributionFilterParams
-        //     {
-        //         GetTrunkThreshold = _ => threshold
-        //     });
-        //     var fitnessFunction = geneticDistributionFilter.GetFitnessFunction();
-        //
-        //     var factory = new CollectivePhenotypeFactory<ParabolicParameters>();
-        //     var individualFactory =
-        //         new IndividualFactory<CollectiveGenotype<ParabolicParameters>, CollectivePhenotype<ParabolicParameters>>(factory, fitnessFunction);
-        //     var compareCriteria = new SimpleComparison(fitnessFunction, EOptimizationMode.Minimize);
-        //     var geneticAlgorithm = new GeneticAlgorithm
-        //     {
-        //         StopConditions = new IStopCondition[]
-        //         {
-        //             new TimeSpanCondition(TimeSpan.FromSeconds(0.3f)),
-        //             new PopulationDegradation(0.9f),
-        //             new SufficientIndividual(fitnessFunction, threshold - 0.001f)
-        //         },
-        //         StopConditionMode = EStopConditionMode.Any,
-        //         Population = new Population(fitnessFunction, 60)
-        //         {
-        //             CompareCriteria = compareCriteria,
-        //             Crossover = new SinglePointCrossover(),
-        //             HeavenPolicy = new OneGod(),
-        //             Mutation = new ArithmeticMutation(new[]
-        //                 {
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10),
-        //                     new Range<float>(-10, 10)
-        //                 },
-        //                 new[]
-        //                 {
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte,
-        //                     ArithmeticMutation.EMode.Byte
-        //                 }
-        //             ),
-        //             MutationPolicy = new HesserMannerMutation(1, 1, 0.1f),
-        //             ResizePolicy = new ConstantResizePolicy(),
-        //             IndividualFactory = individualFactory,
-        //             IncompatibilityPolicy = new AllowAll(),
-        //             SelectionMethod = new Tournament(compareCriteria, 0.01f),
-        //             StatisticUtilities = new Dictionary<string, IStatisticUtility>()
-        //         }
-        //     };
-        //     geneticDistributionFilter.GeneticAlgorithm = geneticAlgorithm;
-        //     return geneticDistributionFilter;
-        // }
-        //
-
-        // private static Task DetectTree(DetectVerb detectVerb)
-        // {
-        //     using var reader = new XyzReader(detectVerb.InputFile, Encoding.ASCII);
-        //     var cloud = new Cloud(reader);
-        //     cloud.NormalizeHeight();
-        //
-        //     var terrain = new Terrain(cloud);
-        //     var treeDetector = new TreeDetector();
-        //
-        //     IPointSetFilter[] pointSetFilters =
-        //     {
-        //         new LargeGroupsFilter(p => Math.Max(0.1f, 0.75f - 0.01f * p)),
-        //         new AspectRatioFilter(0.85f, 1.2f),
-        //         new SmallGroupsFilter(p => Math.Max(0.05f, 0.3f - 0.02f * p)),
-        //         PrepareGeneticDistributionFilter(0.3f),
-        //         PrepareEllipsisMatchFilter()
-        //     };
-        //
-        //     var detectionParameters = new DetectionParameters
-        //     {
-        //         PointSetFilters = pointSetFilters
-        //     };
-        //     var mergingParameters = new MergingParameters
-        //     {
-        //         MinimumRegressionGroupingDistance = 0.09,
-        //         MaximumGroupingEmptyHeight = 20,
-        //         MinimumGroupingDistance = 0.35,
-        //     };
-        //     var x = 0;
-        //
-        //     Directory.CreateDirectory(detectVerb.OutputDirectory);
-        //
-        //     var trees = treeDetector.DetectPotentialTrees(cloud, detectionParameters, mergingParameters).ToList();
-        //
-        //
-        //     var approximation = new TreeApproximation(PrepareGeneticEllipseMatchAlgorithm(), 0.8, 0.01f);
-        //     foreach (var detectedTree in trees)
-        //     {
-        //         var tree = approximation.ApproximateTree(detectedTree, terrain);
-        //         using var writer1 = new XyzWriter($"{detectVerb.OutputDirectory}/T{x++}.e.xyz");
-        //         using var writer2 = new XyzWriter($"{detectVerb.OutputDirectory}/T{x++}.xyz");
-        //         var ellipses = tree.GetAllNodesAsVector().Select(node => node.Ellipse).Where(ellipsis => ellipsis != null);
-        //         foreach (var ellipse in ellipses)
-        //         {
-        //             ellipse.ExportToStream(writer1);
-        //         }
-        //
-        //         foreach (var node in tree.GetAllNodesAsVector())
-        //         {
-        //             writer2.WritePointSet(node.PointSet);
-        //         }
-        //     }
-        //
-        //     return Task.CompletedTask;
-        //
-        //     // var pointSetGroups = treeDetector.DetectTrunkPointSets(cloud, detectionParameters).ToList();
-        //     // using var writer = new XyzWriter($"{detectVerb.OutputDirectory}/trunk.xyz");
-        //     //
-        //     // foreach (var pointSetGroup in pointSetGroups)
-        //     // {
-        //     //     var pointSetSize = pointSetGroup.PointSets.Select(pointSet => pointSet.Count).Sum();
-        //     //     if (pointSetSize <= 0)
-        //     //     {
-        //     //         continue;
-        //     //     }
-        //     //
-        //     //     foreach (var t in pointSetGroup.PointSets)
-        //     //     {
-        //     //         writer.WritePointSet(t);
-        //     //     }
-        //     // }
-        // }
     }
 }

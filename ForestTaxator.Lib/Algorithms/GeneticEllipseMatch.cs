@@ -13,6 +13,7 @@ namespace ForestTaxator.Lib.Algorithms
         public double EccentricityThreshold { get; set; }
         public double BufferWidth { get; set; }
         public GeneticAlgorithm GeneticAlgorithm { get; set; }
+        private static readonly Random _random = new();
         
         public virtual IIndividual FindBestIndividual(PointSet group, Ellipsis initializer = null)
         {
@@ -35,41 +36,61 @@ namespace ForestTaxator.Lib.Algorithms
             return best;
         }
 
+        private static float Coalesce(double? val) => (float)(val ?? _random.NextDouble() * 0.5f - 0.25f);
+
         [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
         [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
         public virtual void ReinitializePopulation(Ellipsis initializer = null)
         {
             GeneticAlgorithm.Population.Initialize(() =>
             {
-                const float OffsetDeviationInMeters = 0.05f;
-                const float RadiusDeviationInMeters = 0.25f;
+                const float OffsetDeviationInMeters = 0.2f;
+                const float RadiusDeviationInMeters = 0.1f;
+                const float RadiusBaseOffset = RadiusDeviationInMeters / 2;
+                const int RadiusSteps = 4;
                 
-                var random = new Random();
                 var individuals = new IIndividual[GeneticAlgorithm.Population.Size];
-                
-                var offsetStepSize = OffsetDeviationInMeters / GeneticAlgorithm.Population.Size;
+
+                var radiusStepSize = RadiusDeviationInMeters / RadiusSteps;
+                var offsetStepSize = OffsetDeviationInMeters / GeneticAlgorithm.Population.Size * RadiusSteps;
                 var halfOffsetDeviationInMeters = OffsetDeviationInMeters / 2;
 
                 var analyzedPointSet = EllipsisMatchFitness.AnalyzedPointSet;
 
                 var defaultRadius = 0.5f * Math.Min(analyzedPointSet.BoundingBox.Width, analyzedPointSet.BoundingBox.Depth);
                 
-                for (var i = 0; i < GeneticAlgorithm.Population.Size; i++)
+                for (var i = 0; i < GeneticAlgorithm.Population.Size / RadiusSteps; i++)
                 {
-                    var x1 = (float)((initializer?.FirstFocal.X ?? random.NextDouble()*0.5f) + i * offsetStepSize - halfOffsetDeviationInMeters);
-                    var x2 = (float)((initializer?.SecondFocal.X ?? random.NextDouble()*0.5f) + i * offsetStepSize - halfOffsetDeviationInMeters);
-                    var y1 = (float)((initializer?.FirstFocal.Y ?? random.NextDouble()*0.5f) + i * offsetStepSize - halfOffsetDeviationInMeters);
-                    var y2 = (float)((initializer?.SecondFocal.Y ?? random.NextDouble()*0.5f) + i * offsetStepSize - halfOffsetDeviationInMeters);
-                    var genotype = new CollectiveGenotype<EllipticParameters>(new EllipticParameters
+                    // [-halfOffsetDeviationInMeters; halfOffsetDeviationInMeters]
+                    var offset = i * offsetStepSize - halfOffsetDeviationInMeters;
+                    var x1 = Coalesce(initializer?.FirstFocal.X) + offset;
+                    var x2 = Coalesce(initializer?.SecondFocal.X) + offset;
+                    var y1 = Coalesce(initializer?.FirstFocal.Y) + offset;
+                    var y2 = Coalesce(initializer?.SecondFocal.Y) + offset;
+
+                    for (var j = 0; j < RadiusSteps; j++)
+                    {
+                        var radiusBase = initializer?.MajorRadius ?? defaultRadius;
+                        var radiusOffset = j * radiusStepSize - RadiusBaseOffset;
+                        var radius = radiusBase + radiusOffset;
+                    
+                        var genotype = new CollectiveGenotype<EllipticParameters>(new EllipticParameters
+                            {
+                                X1 = x1,
+                                X2 = x2,
+                                Y1 = y1,
+                                Y2 = y2,
+                                A = (float) radius
+                            }
+                        );
+                        var index = i * RadiusSteps + j;
+                        if (index < individuals.Length)
                         {
-                            X1 = x1,
-                            X2 = x2,
-                            Y1 = y1,
-                            Y2 = y2,
-                            A = (float) (initializer?.MajorRadius ?? defaultRadius + random.NextDouble()*RadiusDeviationInMeters)
+                            individuals[index] = GeneticAlgorithm.Population.IndividualFactory.CreateFromGenotype(genotype);
                         }
-                    );
-                    individuals[i] = GeneticAlgorithm.Population.IndividualFactory.CreateFromGenotype(genotype);
+                    }
+                    
+                    
                 }
 
                 return individuals;

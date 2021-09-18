@@ -1,0 +1,355 @@
+{
+  "Name": "GeneticAlgorithm",
+  "Type": "GeneticToolkit.GeneticAlgorithm",
+  "Properties": [
+    {
+      "Name": "Population",
+      "Type": "GeneticToolkit.Populations.Population",
+      "Parameters": [
+        {
+          "Name": "Size",
+          "Type": "System.Int32",
+          "Value": 80
+        }
+      ],
+      "Properties": [
+        {
+          "Name": "MaxSelectionTries",
+          "Type": "System.Int32",
+          "Value": 10
+        },
+        {
+          "Name": "Crossover",
+          "Type": "GeneticToolkit.Crossovers.SinglePointCrossover",
+          "Properties": [
+            {
+              "Name": "BitAlign",
+              "Type": "System.Int32",
+              "Value": 1
+            }
+          ],
+          "GenericParameters": []
+        },
+        {
+          "Name": "Mutation",
+          "Type": "GeneticToolkit.Mutations.ArithmeticMutation",
+          "Properties": [
+            {
+              "Name": "MutationRanges",
+              "Type": "GeneticToolkit.Utils.Range[]",
+              "Value": [
+                {
+                  "Name": "MutationRanges",
+                  "Type": "GeneticToolkit.Utils.Range",
+                  "Properties": [
+                    {
+                      "Name": "Low",
+                      "Type": "System.Single",
+                      "Value": -10
+                    },
+                    {
+                      "Name": "High",
+                      "Type": "System.Single",
+                      "Value": 10
+                    }
+                  ],
+                  "GenericParameters": [
+                    "System.Single"
+                  ]
+                },
+                {
+                  "Name": "MutationRanges",
+                  "Type": "GeneticToolkit.Utils.Range",
+                  "Properties": [
+                    {
+                      "Name": "Low",
+                      "Type": "System.Single",
+                      "Value": -10
+                    },
+                    {
+                      "Name": "High",
+                      "Type": "System.Single",
+                      "Value": 10
+                    }
+                  ],
+                  "GenericParameters": [
+                    "System.Single"
+                  ]
+                },
+                {
+                  "Name": "MutationRanges",
+                  "Type": "GeneticToolkit.Utils.Range",
+                  "Properties": [
+                    {
+                      "Name": "Low",
+                      "Type": "System.Single",
+                      "Value": -10
+                    },
+                    {
+                      "Name": "High",
+                      "Type": "System.Single",
+                      "Value": 10
+                    }
+                  ],
+                  "GenericParameters": [
+                    "System.Single"
+                  ]
+                },
+                {
+                  "Name": "MutationRanges",
+                  "Type": "GeneticToolkit.Utils.Range",
+                  "Properties": [
+                    {
+                      "Name": "Low",
+                      "Type": "System.Single",
+                      "Value": -10
+                    },
+                    {
+                      "Name": "High",
+                      "Type": "System.Single",
+                      "Value": 10
+                    }
+                  ],
+                  "GenericParameters": [
+                    "System.Single"
+                  ]
+                },
+                {
+                  "Name": "MutationRanges",
+                  "Type": "GeneticToolkit.Utils.Range",
+                  "Properties": [
+                    {
+                      "Name": "Low",
+                      "Type": "System.Single",
+                      "Value": -10
+                    },
+                    {
+                      "Name": "High",
+                      "Type": "System.Single",
+                      "Value": 10
+                    }
+                  ],
+                  "GenericParameters": [
+                    "System.Single"
+                  ]
+                }
+              ],
+              "GenericParameters": [
+                "System.Single"
+              ]
+            },
+            {
+              "Name": "Modes",
+              "Type": "GeneticToolkit.Mutations.ArithmeticMutation+EMode[]",
+              "Value": [
+                {
+                  "Name": "Modes",
+                  "Type": "GeneticToolkit.Mutations.ArithmeticMutation+EMode",
+                  "Value": "Byte"
+                },
+                {
+                  "Name": "Modes",
+                  "Type": "GeneticToolkit.Mutations.ArithmeticMutation+EMode",
+                  "Value": "Byte"
+                },
+                {
+                  "Name": "Modes",
+                  "Type": "GeneticToolkit.Mutations.ArithmeticMutation+EMode",
+                  "Value": "Byte"
+                },
+                {
+                  "Name": "Modes",
+                  "Type": "GeneticToolkit.Mutations.ArithmeticMutation+EMode",
+                  "Value": "Byte"
+                },
+                {
+                  "Name": "Modes",
+                  "Type": "GeneticToolkit.Mutations.ArithmeticMutation+EMode",
+                  "Value": "Byte"
+                }
+              ],
+              "GenericParameters": []
+            }
+          ],
+          "GenericParameters": []
+        },
+        {
+          "Name": "IncompatibilityPolicy",
+          "Type": "GeneticToolkit.Policies.Incompatibility.AllowAll",
+          "Properties": [
+            null
+          ],
+          "GenericParameters": []
+        },
+        {
+          "Name": "MutationPolicy",
+          "Type": "GeneticToolkit.Policies.Mutation.HesserMannerMutation",
+          "Properties": [
+            {
+              "Name": "Alpha",
+              "Type": "System.Single",
+              "Value": 1
+            },
+            {
+              "Name": "Beta",
+              "Type": "System.Single",
+              "Value": 1
+            }
+          ],
+          "GenericParameters": []
+        },
+        {
+          "Name": "ResizePolicy",
+          "Type": "GeneticToolkit.Policies.Resize.ConstantResizePolicy",
+          "Properties": [],
+          "GenericParameters": []
+        },
+        {
+          "Name": "SelectionMethod",
+          "Type": "GeneticToolkit.Selections.Tournament",
+          "Properties": [
+            {
+              "Name": "PopulationPercentage",
+              "Type": "System.Single",
+              "Value": 0.01
+            },
+            {
+              "Name": "CompareCriteria",
+              "Type": "GeneticToolkit.Comparisons.SimpleComparison",
+              "Properties": [
+                {
+                  "Name": "OptimizationMode",
+                  "Type": "GeneticToolkit.Interfaces.EOptimizationMode",
+                  "Value": "Minimize"
+                }
+              ],
+              "GenericParameters": [
+                "ForestTaxator.Lib.Fitness.EllipsisMatchFitness"
+              ]
+            }
+          ],
+          "GenericParameters": [
+            "ForestTaxator.Lib.Fitness.EllipsisMatchFitness"
+          ]
+        },
+        {
+          "Name": "Generation",
+          "Type": "System.UInt32",
+          "Value": 0
+        },
+        {
+          "Name": "IncestLimit",
+          "Type": "System.Single",
+          "Value": 0.99
+        },
+        {
+          "Name": "DegenerationLimit",
+          "Type": "System.Single",
+          "Value": 0.95
+        },
+        {
+          "Name": "CompareCriteria",
+          "Type": "GeneticToolkit.Comparisons.SimpleComparison",
+          "Properties": [
+            {
+              "Name": "OptimizationMode",
+              "Type": "GeneticToolkit.Interfaces.EOptimizationMode",
+              "Value": "Minimize"
+            }
+          ],
+          "GenericParameters": [
+            "ForestTaxator.Lib.Fitness.EllipsisMatchFitness"
+          ]
+        },
+        {
+          "Name": "HeavenPolicy",
+          "Type": "GeneticToolkit.Policies.Heaven.OneGod",
+          "Properties": [
+            {
+              "Name": "UseInCrossover",
+              "Type": "System.Boolean",
+              "Value": false
+            }
+          ],
+          "GenericParameters": []
+        },
+        null,
+        {
+          "Name": "StatisticUtilities",
+          "Type": "System.Collections.Generic.Dictionary",
+          "Properties": [],
+          "GenericParameters": [
+            "System.String",
+            "GeneticToolkit.Interfaces.IStatisticUtility"
+          ]
+        }
+      ],
+      "GenericParameters": [
+        "ForestTaxator.Lib.Fitness.EllipsisMatchFitness"
+      ]
+    },
+    {
+      "Name": "StopConditions",
+      "Type": "GeneticToolkit.Interfaces.IStopCondition[]",
+      "Value": [
+        {
+          "Name": "StopConditions",
+          "Type": "GeneticToolkit.Policies.Stop.TimeSpanCondition",
+          "Properties": [
+            {
+              "Name": "StartTime",
+              "Type": "System.DateTime",
+              "Value": "0001-01-01T00:00:00"
+            },
+            {
+              "Name": "CalculationTime",
+              "Type": "System.TimeSpan",
+              "Parameters": [
+                {
+                  "Name": "ticks",
+                  "Type": "System.Int64",
+                  "Value": 120000000
+                }
+              ],
+              "GenericParameters": []
+            }
+          ],
+          "GenericParameters": []
+        },
+        {
+          "Name": "StopConditions",
+          "Type": "GeneticToolkit.Policies.Stop.PopulationDegradation",
+          "Properties": [
+            {
+              "Name": "MaximumSimilarity",
+              "Type": "System.Double",
+              "Value": 0.90
+            }
+          ],
+          "GenericParameters": []
+        },
+        {
+          "Name": "StopConditions",
+          "Type": "GeneticToolkit.Policies.Stop.SufficientIndividual",
+          "Properties": [
+            {
+              "Name": "SufficientResult",
+              "Type": "System.Double",
+              "Value": 0.0099
+            }
+          ],
+          "GenericParameters": [
+            "ForestTaxator.Lib.Fitness.EllipsisMatchFitness"
+          ]
+        }
+      ],
+      "GenericParameters": []
+    },
+    {
+      "Name": "StopConditionMode",
+      "Type": "GeneticToolkit.EStopConditionMode",
+      "Value": "Any"
+    }
+  ],
+  "GenericParameters": []
+}

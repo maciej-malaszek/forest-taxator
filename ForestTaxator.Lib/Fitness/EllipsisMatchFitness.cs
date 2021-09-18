@@ -28,6 +28,7 @@ namespace ForestTaxator.Lib.Fitness
 
             double fitness = 0;
             var counter = 0;
+            double maxDistance = 0;
 
             var offsetFoci1 = x.F1 + AnalyzedPointSet.Center;
             var offsetFoci2 = x.F2 + AnalyzedPointSet.Center;
@@ -51,8 +52,14 @@ namespace ForestTaxator.Lib.Fitness
                     fitness += absoluteDistance;
                     counter++;
                 }
+
+                if (absoluteDistance > maxDistance)
+                {
+                    maxDistance = absoluteDistance;
+                }
             }
             fitness /= counter;
+            fitness += maxDistance;
            
             return fitness;
         }

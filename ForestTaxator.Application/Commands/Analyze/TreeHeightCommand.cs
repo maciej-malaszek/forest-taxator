@@ -2,8 +2,8 @@ using CommandLine;
 
 namespace ForestTaxator.Application.Commands.Analyze
 {
-    [Verb("terrain")]
-    public class TerrainCommand
+    [Verb("tree-height")]
+    public class TreeHeightCommand
     {
         [Value(0, HelpText = "Input file", Required = true)]
         public string Input { get; set; }
@@ -14,7 +14,7 @@ namespace ForestTaxator.Application.Commands.Analyze
         [Option('r', "resolution", Default = 2.5)]
         public double Resolution { get; set; }
         
-        [Option('h', "max-height", Default = 1)]
+        [Option('h', "max-height", Default = 100)]
         public double MaxHeight { get; set; }
     }
 }

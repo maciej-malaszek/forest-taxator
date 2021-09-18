@@ -19,6 +19,10 @@ namespace ForestTaxator.Lib.Filters
         public bool ConditionMatched(PointSet pointSet, int index, int total)
         {
             var bestPossibleIndividual = GeneticEllipseMatch.FindBestIndividual(pointSet);
+            if (bestPossibleIndividual is null)
+            {
+                return false;
+            }
             var fitness = GeneticEllipseMatch.GeneticAlgorithm.Population.FitnessFunction.GetValue(bestPossibleIndividual.Phenotype);
             var ellipseParameters = ((CollectivePhenotype<EllipticParameters>)bestPossibleIndividual.Phenotype).GetValue();
             var ellipse = new Ellipsis(ellipseParameters, 0);
