@@ -96,7 +96,7 @@ namespace ForestTaxator.Lib.Model
 
         public double Error { get; set; }
 
-        public void SetFirstFocal(EDimension dimension, float newValue)
+        public void SetFirstFocal(EDimension dimension, double newValue)
         {
             _firstFocal[(int)dimension] = newValue;
             _focalLength = null;
@@ -104,7 +104,7 @@ namespace ForestTaxator.Lib.Model
             _minorRadius = null;
         }
 
-        public void SetSecondFocal(EDimension dimension, float newValue)
+        public void SetSecondFocal(EDimension dimension, double newValue)
         {
             _secondFocal[(int)dimension] = newValue;
             _focalLength = null;

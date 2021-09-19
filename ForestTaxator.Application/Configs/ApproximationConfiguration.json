@@ -1,6 +1,6 @@
 {
   "EccentricityThreshold": 0.8,
-  "FitnessThreshold": 0.015,
+  "FitnessThreshold": 0.06,
   "EllipsisMatchConfiguration": {
     "BufferWidth": 0.001,
     "InvalidEccentricityThreshold": 0.85,

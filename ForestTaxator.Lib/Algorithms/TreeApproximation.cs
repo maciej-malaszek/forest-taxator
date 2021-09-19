@@ -34,7 +34,7 @@ namespace ForestTaxator.Lib.Algorithms
             ApproximateGenetically(nodes, population);
 
             var ellipses = nodes.Select(n => n.Ellipse).ToArray();
-            var correctEllipses = ellipses.Select(e => e != null && double.IsNaN(e.MajorRadius) == false).ToArray();
+            var correctEllipses = ellipses.Where(e => e != null && double.IsNaN(e.MajorRadius) == false).ToArray();
             if (correctEllipses.Length == 0 || (float)correctEllipses.Length / ellipses.Length < 0.25)
             {
                 return null;
@@ -75,12 +75,13 @@ namespace ForestTaxator.Lib.Algorithms
                     Intensity = fitness
                 };
 
-                ellipse.FirstFocal.X += node.PointSet.Center.X;
-                ellipse.SecondFocal.X += node.PointSet.Center.X;
-                ellipse.FirstFocal.Y += node.PointSet.Center.Y;
-                ellipse.SecondFocal.Y += node.PointSet.Center.Y;
-
-                if (ellipse.Eccentricity < _eccentricityThreshold && fitness < _fitnessThreshold)
+                ellipse.SetFirstFocal(MathUtils.EDimension.X, ellipse.FirstFocal.X + node.PointSet.Center.X);
+                ellipse.SetFirstFocal(MathUtils.EDimension.Y, ellipse.FirstFocal.Y + node.PointSet.Center.Y);
+                
+                ellipse.SetSecondFocal(MathUtils.EDimension.X, ellipse.SecondFocal.X + node.PointSet.Center.X);
+                ellipse.SetSecondFocal(MathUtils.EDimension.Y, ellipse.SecondFocal.Y + node.PointSet.Center.Y);
+                
+                if (ellipse.Eccentricity < _eccentricityThreshold && fitness < _fitnessThreshold && double.IsNaN(fitness) == false)
                 {
                     node.Ellipse = ellipse;
                 }

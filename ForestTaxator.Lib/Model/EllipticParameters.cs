@@ -8,7 +8,7 @@ namespace ForestTaxator.Lib.Model
     {
         private static readonly Range<float>[] _range = {
                 new(0.01f, 0.4f),
-                new(-0.1f, 0.1f),
+                new(-0.16f, 0.16f),
           };
 
         private static float Scale0 => _range[0].High - _range[0].Low;

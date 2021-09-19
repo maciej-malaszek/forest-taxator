@@ -46,6 +46,11 @@ namespace ForestTaxator.Lib.Fitness
                 // the ellipse is the set of points P such that the sum of the distances PF1, PF2 is equal to 2a:
                 var dist = pf1 + pf2 - 2 * x.A;
 
+                if (double.IsNaN(dist))
+                {
+                    return double.MaxValue;
+                }
+
                 var absoluteDistance = Math.Abs(dist); 
                 if (absoluteDistance > BufferWidth)
                 {
@@ -60,6 +65,7 @@ namespace ForestTaxator.Lib.Fitness
             }
             fitness /= counter;
             fitness += maxDistance;
+            fitness /= 2;
            
             return fitness;
         }
