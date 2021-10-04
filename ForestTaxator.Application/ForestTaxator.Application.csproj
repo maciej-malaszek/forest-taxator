@@ -35,6 +35,9 @@
       <None Update="Configs\ApproximationConfiguration.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Configs\ApproximationEllipsisMatch.GeneticAlgorithm.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
