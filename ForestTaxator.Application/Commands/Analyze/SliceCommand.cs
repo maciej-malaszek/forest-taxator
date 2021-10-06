@@ -11,7 +11,7 @@ namespace ForestTaxator.Application.Commands.Analyze
         [Option('h', "slice-height", Default = 0.1)]
         public double SliceHeight { get; set; }
         
-        [Option('t', "terrain", Required = true)]
+        [Option('t', "terrain", Required = true, HelpText = "Path to terrain heightmap file")]
         public string TerrainPath { get; set; }
         
         [Option('o', "output", Required = true)]

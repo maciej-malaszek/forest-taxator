@@ -54,6 +54,7 @@ namespace ForestTaxator.Lib.Model
 
         protected virtual void Export(string file, byte[] magicNumbers)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(file)!);
             using var fileStream = new FileStream(file, FileMode.OpenOrCreate, FileAccess.Write);
             using var binaryWriter = new BinaryWriter(fileStream);
 

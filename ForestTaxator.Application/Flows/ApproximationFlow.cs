@@ -106,6 +106,10 @@ namespace ForestTaxator.Application.Flows
             }
 
             var treeHeightMap = TreeHeightMap.Import(command.TreeHeightMapPath);
+            if (treeHeightMap is null)
+            {
+                logger.Fatal("Could not load tree heightmap! Check if you are providing correct data format");
+            }
 
             var configurationFileContent = File.ReadAllText(command.ConfigurationFile);
             var configuration = JsonConvert.DeserializeObject<ApproximationConfiguration>(configurationFileContent);

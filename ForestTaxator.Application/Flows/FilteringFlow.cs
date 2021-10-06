@@ -62,7 +62,7 @@ namespace ForestTaxator.Application.Flows
             var geneticDistributionFilterParams = new GeneticDistributionFilterParams
             {
                 DistributionResolution = configuration.DistributionResolution,
-                GetTrunkThreshold = height => handler(new object[] {height})
+                GetTrunkThreshold = height => handler(new object[] { height })
             };
             var geneticDistributionFilter = new GeneticDistributionFilter(geneticDistributionFilterParams);
             var compareCriteria = new SimpleComparison<GeneticDistributionFitness>(EOptimizationMode.Minimize);
@@ -116,7 +116,7 @@ namespace ForestTaxator.Application.Flows
                 filters.Add(
                     filtersConfiguration.LargeGroupsFilter.Order,
                     new LargeGroupsFilter(
-                        height => functor(new object[] {height})
+                        height => functor(new object[] { height })
                     )
                 );
             }
@@ -127,7 +127,7 @@ namespace ForestTaxator.Application.Flows
                 filters.Add(
                     filtersConfiguration.SmallGroupsFilter.Order,
                     new SmallGroupsFilter(
-                        height => functor(new object[] {height})
+                        height => functor(new object[] { height })
                     )
                 );
             }
@@ -162,7 +162,7 @@ namespace ForestTaxator.Application.Flows
                 PointSetFilters = filters,
                 MeshWidth = 0.15f
             };
-            
+
             logger?.Information("Starting point grouping...");
             var groups = slices.Select(slice =>
                     slice?.GroupByDistance(detectionParameters.MeshWidth, detectionParameters.MinimalPointsPerMesh)
@@ -178,7 +178,7 @@ namespace ForestTaxator.Application.Flows
             }).Where(x => x != null).ToList();
             return pointSetGroups;
         }
-        
+
         public static Task Execute(FilterCommand command, ILogger logger)
         {
             if (File.Exists(command.Input) == false)
@@ -192,31 +192,23 @@ namespace ForestTaxator.Application.Flows
                 logger.Fatal("Configuration file does not exist!");
                 Environment.Exit(0);
             }
-            
+
             using var reader = new GpdReader(command.Input);
-            var slices = reader.ReadPointSlices().Where(s=> s != null).ToList();
+            var slices = reader.ReadPointSlices().Where(s => s != null).ToList();
             foreach (var slice in slices)
             {
                 slice.PointSets = slice.PointSets.Where(p => p is { Empty: false }).ToList();
             }
+
             var pointSetGroups = GetFilteredPointSetGroups(command.FiltersConfigurationFile, logger, slices);
-            
-            if (command.Merge)
+
+
+            using var writer = new GpdWriter(command.Output, null, reader.Header.Slice);
+            for (var i = 0; i < pointSetGroups.Count; i++)
             {
-                using var writer = new GpdWriter(Path.Join(command.Output,"Filtered.gpd"), null, reader.Header.Slice);
-                for(var i = 0; i < pointSetGroups.Count; i++)
-                {
-                    writer.WritePointSetGroup(pointSetGroups[i], i);
-                }
+                writer.WritePointSetGroup(pointSetGroups[i], i);
             }
-            else
-            {
-                for(var i = 0; i < pointSetGroups.Count; i++)
-                {
-                    using var writer = new GpdWriter(Path.Join(command.Output,$"Filtered.{i}.gpd"), null, reader.Header.Slice);
-                    writer.WritePointSetGroup(pointSetGroups[i], i);
-                }
-            }
+
 
             return Task.CompletedTask;
         }

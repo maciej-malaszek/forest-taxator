@@ -12,15 +12,15 @@ namespace ForestTaxator.Application.Commands.Analyze
         [Option("raw", HelpText = "process files as raw cloud points")]
         public bool Raw { get; set; }
 
-        [Option('c', "filters-configuration")]
+        [Option('c', "filters-configuration", HelpText ="Required if --raw switch is used")]
         [OptionRequiredIfFlagged("Raw")]
         public string FiltersConfigurationFile { get; set; }
 
-        [Option('h', "slice-height")]
+        [Option('h', "slice-height", HelpText ="Required if --raw switch is used")]
         [OptionRequiredIfFlagged("Raw")]
         public double? SliceHeight { get; set; }
 
-        [Option('r', "resolution", Default = 2.5)]
+        [Option('r', "resolution", Default = 2.5, HelpText ="Required if --raw switch is used")]
         [OptionRequiredIfFlagged("Raw")]
         public double Resolution { get; set; }
 
