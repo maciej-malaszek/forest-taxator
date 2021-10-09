@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -67,7 +68,7 @@ namespace ForestTaxator.Lib.Data.PCD
             Size = ParseSize(headerFields["SIZE"]);
             Fields = headerFields["FIELDS"];
             Count = headerFields["COUNT"].Select(x => Convert.ToInt32(x)).ToArray();
-            Viewpoint = headerFields["VIEWPOINT"].Select(Convert.ToDouble).ToArray();
+            Viewpoint = headerFields["VIEWPOINT"].Select(p => Convert.ToDouble(p, CultureInfo.InvariantCulture)).ToArray();
             Width = Convert.ToUInt64(headerFields["WIDTH"][0]);
             Height = Convert.ToUInt64(headerFields["HEIGHT"][0]);
             Points = Convert.ToUInt64(headerFields["POINTS"][0]);

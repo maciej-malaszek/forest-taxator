@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using ForestTaxator.Lib.Data.Compression;
@@ -41,10 +42,10 @@ namespace ForestTaxator.Lib.Data.PCD
                     (PcdHeader.EType.U, PcdHeader.ESize.Short) => ushort.Parse(fields[i]),
                     (PcdHeader.EType.U, PcdHeader.ESize.Single) => uint.Parse(fields[i]),
                     (PcdHeader.EType.U, PcdHeader.ESize.Double) => ulong.Parse(fields[i]),
-                    (PcdHeader.EType.F, PcdHeader.ESize.Byte) => float.Parse(fields[i]),
-                    (PcdHeader.EType.F, PcdHeader.ESize.Short) => float.Parse(fields[i]),
-                    (PcdHeader.EType.F, PcdHeader.ESize.Single) => float.Parse(fields[i]),
-                    (PcdHeader.EType.F, PcdHeader.ESize.Double) => double.Parse(fields[i]),
+                    (PcdHeader.EType.F, PcdHeader.ESize.Byte) => float.Parse(fields[i], CultureInfo.InvariantCulture),
+                    (PcdHeader.EType.F, PcdHeader.ESize.Short) => float.Parse(fields[i], CultureInfo.InvariantCulture),
+                    (PcdHeader.EType.F, PcdHeader.ESize.Single) => float.Parse(fields[i], CultureInfo.InvariantCulture),
+                    (PcdHeader.EType.F, PcdHeader.ESize.Double) => double.Parse(fields[i], CultureInfo.InvariantCulture),
                     _ => p[i]
                 };
             }

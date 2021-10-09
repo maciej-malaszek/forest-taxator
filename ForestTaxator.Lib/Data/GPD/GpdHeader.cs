@@ -75,7 +75,7 @@ namespace ForestTaxator.Lib.Data.GPD
             Format = ParseFormat(headerFields["FORMAT"][0]);
             Version = ParseVersion(headerFields["VERSION"][0]);
 
-            Slice = Convert.ToSingle(headerFields["SLICE"][0]);
+            Slice = Convert.ToSingle(headerFields["SLICE"][0], CultureInfo.InvariantCulture);
             Fields = headerFields["FIELDS"];
             Size = ParseSize(headerFields["SIZE"]);
             Type = headerFields["TYPE"].Select(EnumParse<EType>).ToArray();
