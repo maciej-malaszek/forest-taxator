@@ -10,6 +10,10 @@ namespace ForestTaxator.Lib.Extensions
         {
             var distribution = new int[steps];
             var setSize = pointSet.P2[(int) dimension] - pointSet.P1[(int) dimension];
+            if (setSize == 0)
+            {
+                return new Distribution(distribution);
+            }
             var stepSize = setSize / (steps - 1);
 
             foreach (var cloudPoint in pointSet)

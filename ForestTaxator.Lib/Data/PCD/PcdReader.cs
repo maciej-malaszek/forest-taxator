@@ -89,6 +89,10 @@ namespace ForestTaxator.Lib.Data.PCD
         {
             var p = new CloudPoint();
             // Points are stored as XXXYYYZZZIII instead of XYZIXYZIXYZI
+            if (_pointIndex / (long)Header.Size[2] >= (long)Header.Points)
+            {
+                return null;
+            }
             for (var i = 0; i < Header.Fields.Length; i++)
             {
                 var position = (long)Header.Points * (long) Header.Size[i] * i; // skip all points for previous dimensions

@@ -76,6 +76,8 @@ namespace ForestTaxator.Lib.Data.PCD
             DataType = EnumParse<EDataType>(headerFields["DATA"][0].ToUpper());
             
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
+            reader.DiscardBufferedData();
+
         }
 
         #region Functions
